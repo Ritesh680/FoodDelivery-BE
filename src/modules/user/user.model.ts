@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 		type: String,
 		required: true,
 	},
+	provider: {
+		type: String,
+		default: "local",
+	},
 	email: {
 		type: String,
 		required: true,
@@ -36,8 +40,15 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 	},
 	phone: {
 		type: String,
-		required: true,
-		unique: true,
+		required: function () {
+			const tthis = this || {};
+			if (authTypes.indexOf(tthis.provider) === -1) {
+				return true;
+			} else {
+				return false;
+			}
+		},
+		nullable: true,
 	},
 	password: {
 		type: String,

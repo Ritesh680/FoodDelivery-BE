@@ -9,13 +9,17 @@ const config = Config();
 import passport from "passport";
 
 import session from "express-session";
+import MongoStore from "connect-mongo";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require("./auth/passportGoogle/passport");
 
 const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: "*",
+	origin: "http://localhost:5173",
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
+	credentials: true,
 };
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -25,8 +29,14 @@ app.use(
 		resave: false,
 		saveUninitialized: true,
 		secret: config.secret,
+		cookie: {
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+			signed: true,
+		},
+		store: MongoStore.create({ mongoUrl: config.database_URI }),
 	})
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 

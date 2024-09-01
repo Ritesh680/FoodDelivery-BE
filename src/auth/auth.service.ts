@@ -56,6 +56,45 @@ export default class AuthService {
 	userModel = User;
 	refreshTokensList = {};
 
+	googleAuthenticate = passport.authenticate("google", {
+		scope: ["profile", "email"],
+	});
+
+	googleCallbackLogin = passport.authenticate("google", {
+		failureRedirect: "/login/failure",
+		successRedirect: config.clientUrl,
+	});
+
+	googleLoginFailure = (req: Request, res: Response) => {
+		res.status(401).json({
+			success: false,
+			message: "user has failed to authenticate",
+		});
+	};
+
+	googleLoginSuccess = (req: Request, res: Response, next: NextFunction) => {
+		if (req.user) {
+			console.log({ ...(req.user as any) });
+			(req as any).USER = req.user;
+			(req as any).token = AuthService.signToken(req.user);
+			(req as any).tokenExpireDate = "24 Hr";
+			next();
+		} else {
+			res.status(401).json({
+				success: false,
+				message: "user has failed to authenticate",
+			});
+		}
+	};
+
+	googleLogout = (req: Request, res: Response, next: NextFunction) => {
+		req.logOut(function (err) {
+			if (err) {
+				return next(err);
+			}
+		});
+	};
+
 	localLogin = (req: Request, res: Response, next: NextFunction) => {
 		passport.authenticate(
 			"local",
@@ -71,9 +110,11 @@ export default class AuthService {
 					.findById(user._id)
 					.exec()
 					.then((usr) => {
-						(req as any).token = AuthService.signToken(usr);
-						(req as any).tokenExpireDate = "24 Hr";
-						(req as any).USER = usr;
+						if (usr) {
+							(req as any).token = AuthService.signToken(usr);
+							(req as any).tokenExpireDate = "24 Hr";
+							(req as any).USER = usr;
+						}
 						return next();
 					});
 			}
@@ -229,7 +270,7 @@ export default class AuthService {
 		// console.log('--TODO-- : Delete Un-necessary key from here like password and other Stuff');
 
 		(req as any).FILTERED_USER_DEATIL = {
-			role: (req as any).USER.role,
+			role: (req as any).USER.role ?? "user",
 			_id: (req as any).USER._id,
 			createdAt: (req as any).USER.createdAt,
 			name: (req as any).USER.name,

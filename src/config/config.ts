@@ -22,6 +22,12 @@ export default () => {
 		refreshTokenSecrets: {
 			session: process.env.REFRESH_TOKEN_SECRET ?? "refresh-token-secret",
 		},
+
+		googleClientId: process.env.GOOGLE_CLIENT_ID,
+		googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+		googleCallbackURL: process.env.GOOGLE_CALLBACK_URL,
+
+		clientUrl: process.env.CLIENT_URL,
 		tokenLife: 60 * 60 * 24,
 		refreshTokenLife: 60 * 60 * 24 * 7,
 	};

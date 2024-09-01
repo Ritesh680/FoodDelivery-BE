@@ -13,7 +13,6 @@ const localAuthenticate = (
 		options?: { message: string }
 	) => void
 ) => {
-	console.log({ email, password });
 	User.findOne({ email: email.toLowerCase() })
 		.exec()
 		.then((user) => {
@@ -24,7 +23,6 @@ const localAuthenticate = (
 			}
 
 			user.authenticate(password, (authError, authenticated) => {
-				console.log("AUTH ERROR", authError, "AUTHENTICATED", authenticated);
 				if (authError) {
 					return done(authError);
 				}
