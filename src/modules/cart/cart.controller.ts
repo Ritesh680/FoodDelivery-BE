@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Cart from "./cart.model";
 import mongoose from "mongoose";
 import cartService from "./cart.service";
+import productService from "../products/product.service";
 
 class CartController {
 	cart = Cart;
-	addToCart = async (req: Request, res: Response) => {
+	addToCart = async (req: Request, res: Response, next: NextFunction) => {
 		const { quantity, productId } = req.body;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)._id;
@@ -22,6 +23,12 @@ class CartController {
 				message: "Quantity is required",
 			});
 		}
+		const product = await productService.getById(productId).catch(next);
+
+		if (!product) {
+			return;
+		}
+
 		try {
 			const cart = await this.cart
 				.findOne({ user: new mongoose.Types.ObjectId(userId) })
@@ -81,7 +88,9 @@ class CartController {
 		try {
 			const cart = await cartService.getCartItems(userId);
 			if (cart) {
-				return res.status(200).json({ success: true, data: cart[0] });
+				return res
+					.status(200)
+					.json({ success: true, data: cart.length ? cart[0] : cart });
 			}
 			return res
 				.status(404)

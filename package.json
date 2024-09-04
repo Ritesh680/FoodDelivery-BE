@@ -8,7 +8,8 @@
 		"dev": "nodemon src/index.ts",
 		"lint": "eslint src/",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "tsc"
+		"build": "tsc",
+		"seed": "tsc && node dist/seeder/index.js"
 	},
 	"keywords": [],
 	"author": "",
