@@ -16,10 +16,7 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: [
-		"http://localhost:5173",
-		"https://food-delivery-3byln0ldw-ritesh-paudels-projects.vercel.app/",
-	],
+	origin: "*",
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
 };
