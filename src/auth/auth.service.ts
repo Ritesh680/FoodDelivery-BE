@@ -14,7 +14,7 @@ import Config from "../config/config";
 const config = Config();
 
 const validateJwt = expressjwt({
-	secret: config.secret,
+	secret: config.tokenSecrets.session,
 	algorithms: ["HS256"],
 });
 
@@ -94,7 +94,7 @@ export default class AuthService {
 		}
 	};
 
-	googleLogout = (req: Request, res: Response, next: NextFunction) => {
+	logout = (req: Request, res: Response, next: NextFunction) => {
 		req.logOut(function (err) {
 			if (err) {
 				return next(err);
@@ -106,31 +106,10 @@ export default class AuthService {
 		});
 	};
 
-	localLogin = (req: Request, res: Response, next: NextFunction) => {
-		passport.authenticate(
-			"local",
-			{ session: false },
-			(err: Error, user: any, info: any) => {
-				if (err) {
-					return next(err);
-				}
-				if (!user) {
-					return res.status(401).json(info);
-				}
-				this.userModel
-					.findById(user._id)
-					.exec()
-					.then((usr) => {
-						if (usr) {
-							(req as any).token = AuthService.signToken(usr);
-							(req as any).tokenExpireDate = "24 Hr";
-							(req as any).USER = usr;
-						}
-						return next();
-					});
-			}
-		)(req, res, next);
-	};
+	localLogin = passport.authenticate("local", {
+		successRedirect: "/",
+		failureRedirect: "/auth/login/failure",
+	});
 
 	static signToken(user: any) {
 		return jwt.sign(
@@ -159,6 +138,14 @@ export default class AuthService {
 	isAutheticated() {
 		return compose()
 			.use((req: Request, res: Response, next: NextFunction) => {
+				if (req.user) {
+					(req as any).USER = req.user;
+					(req as any).token = AuthService.signToken(req.user);
+					(req as any).tokenExpireDate = "24 Hr";
+					next();
+					return;
+				}
+
 				if (
 					req.query &&
 					Object.prototype.hasOwnProperty.call(req.query, "token")
@@ -188,8 +175,14 @@ export default class AuthService {
 						.send({ "Error Message": "Unauthorized Access" });
 				}
 
+				console.info("==================");
+				console.info("==================");
+				console.info("==================");
+				console.warn("first");
+				console.info("==================");
+				console.info("==================");
+				console.info("==================");
 				User.findById(req.user._id)
-					.select("firstName lastName email role")
 					.exec()
 					.then((user) => {
 						if (!user) {
@@ -200,15 +193,15 @@ export default class AuthService {
 						req.incUsersId = req.user.incUsersId;
 						// req.userTag = user.userTag;
 						// console.log('user.incUsersId = req.user.incUsersId', user.incUsersId, req.user.incUsersId);
-						req.user = user;
+						req.USER = user;
 
-						// return next();
+						return next();
 
 						// console.log('POWER', _.merge(user, { incUsersId: req.user.incUsersId }));
 						// console.log('REQ USER', req.user);
 						// req.user = _.merge(req.user, user);
 						// console.log('IS AUTHENTICATED', user);
-						return injectFilter(req, res, next);
+						// return injectFilter(req, res, next);
 					})
 					.catch((err2) => next(err2));
 			});

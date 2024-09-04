@@ -39,6 +39,7 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+passport.authenticate("session");
 
 db.on("error", console.warn.bind(console, "connection error:"));
 db.once("open", async () => {

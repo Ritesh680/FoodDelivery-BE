@@ -1,13 +1,14 @@
 import express from "express";
 import User from "../modules/user/user.model";
 
-import { setupPassport } from "./passportLocal/passport";
+import setupPassport from "./passportLocal/passport";
 import setupGoogle from "./passportGoogle/passport";
 import setupFacebook from "./passportFacebook/passport";
 
 setupPassport(User);
 setupGoogle(User);
 setupFacebook(User);
+
 import AuthService from "./auth.service";
 const authService = new AuthService();
 
@@ -20,11 +21,11 @@ router.get("/google/callback", authService.googleCallbackLogin);
 router.get("/facebook/callback", authService.facebookCallbackLogin);
 
 router.get("/login/failure", authService.googleLoginFailure);
-router.post("/logout", authService.googleLogout);
+router.post("/logout", authService.logout);
 
 router.get(
 	"/login/success",
-	authService.googleLoginSuccess,
+	authService.isAutheticated(),
 	authService.manageUser,
 	authService.returnUserData
 );
