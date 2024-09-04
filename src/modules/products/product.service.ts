@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Product from "./product.model";
-import CustomError from "../../types/CustomError";
+import CustomError from "../../@types/CustomError";
 
 class ProductService {
 	product = Product;

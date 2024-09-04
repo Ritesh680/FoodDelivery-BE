@@ -10,7 +10,7 @@ import passport from "passport";
 
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import CustomError from "./types/CustomError";
+import CustomError from "./@types/CustomError";
 
 const app: Express = express();
 const port = config.port || 3000;

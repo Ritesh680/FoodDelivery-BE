@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import User, { IUserDocument } from "./user.model";
 import fileService from "../upload/upload.service";
-import CustomError from "../../types/CustomError";
+import CustomError from "../../@types/CustomError";
 
 export default class UsersCtrl {
 	userModel = User;

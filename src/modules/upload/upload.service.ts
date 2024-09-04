@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import CustomError from "../../types/CustomError";
+import CustomError from "../../@types/CustomError";
 class UploadService {
 	async uploadFile() {
 		// file upload logic
