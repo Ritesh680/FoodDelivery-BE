@@ -16,7 +16,7 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: "*",
+	origin: [config.clientUrl ?? "", "http://localhost:5173"],
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
 };
