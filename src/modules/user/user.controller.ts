@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import User from "./user.model";
+import User, { IUserDocument } from "./user.model";
+import fileService from "../upload/upload.service";
+import CustomError from "../../types/CustomError";
 
 export default class UsersCtrl {
 	userModel = User;
@@ -62,7 +64,7 @@ export default class UsersCtrl {
 	};
 
 	updateProfileImage = async (req: Request, res: Response) => {
-		const { profileImage } = req.body;
+		const file = req.file?.filename;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)?._id;
 		if (!userId) {
@@ -71,19 +73,28 @@ export default class UsersCtrl {
 				message: "UserId not found",
 			});
 		}
-		try {
-			const user = await this.userModel.findById(userId).exec();
-			if (user) {
-				user.picture = profileImage;
-				await user.save();
-				return res.json(user);
-			} else {
-				return res
-					.status(404)
-					.json({ success: false, message: "User not found" });
-			}
-		} catch (error) {
-			return res.status(500).json({ success: false, message: error });
+
+		await this.userModel
+			.findByIdAndUpdate(userId, { picture: file })
+			.exec()
+			.then((user) => {
+				if (user) {
+					this.removeUserImage(user);
+					res.status(200).json(user);
+				}
+			})
+			.catch((error) =>
+				res.status(500).json({ success: false, message: error })
+			);
+	};
+
+	removeUserImage = async (user: IUserDocument) => {
+		if (!user.picture) {
+			return;
 		}
+
+		return await fileService.deleteFile(user.picture).catch((err) => {
+			throw new CustomError(err);
+		});
 	};
 }

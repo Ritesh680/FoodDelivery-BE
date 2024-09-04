@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import CustomError from "../../types/CustomError";
 class UploadService {
 	async uploadFile() {
 		// file upload logic
@@ -9,7 +10,9 @@ class UploadService {
 		// file delete logic
 		const filePath = path.join(process.cwd(), "uploads", filename);
 		fs.unlink(filePath, (err) => {
-			throw new Error(err?.message);
+			if (err) {
+				throw new CustomError({ status: 500, message: err?.message });
+			}
 		});
 	}
 }

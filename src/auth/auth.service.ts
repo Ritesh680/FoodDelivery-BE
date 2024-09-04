@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import { expressjwt } from "express-jwt";
 import User from "../modules/user/user.model";
 import * as jwt from "jsonwebtoken";
-//@ts-ignore
+
+//@ts-expect-error the type of composable middleware is unavailable in the registry
 import compose from "composable-middleware";
 
 import passport from "passport";
@@ -34,23 +35,6 @@ interface IUserRequest extends Request {
 	decoded: any;
 	FILTERED_USER_DEATIL: any;
 }
-
-const injectFilter = (req: IUserRequest, res: Response, next: NextFunction) => {
-	// this.index(req, res);
-	// console.log('REQ USER', req.user);
-	if (req.user.role === "ADMIN") {
-		req.filter = { role: { $nin: "ADMIN" } };
-	} else {
-		req.filter = { role: req.user.role };
-	}
-	if (req.user.role !== "ADMIN") {
-		req.filter = { _id: req.user._id };
-	}
-	if (req.user.role === "ADMIN") {
-		req.filter = {};
-	}
-	next();
-};
 
 export default class AuthService {
 	userModel = User;
@@ -135,14 +119,28 @@ export default class AuthService {
 		);
 	}
 
+	getUserDetail(req: IUserRequest, res: Response, next: NextFunction) {
+		User.findById(req.user._id)
+			.exec()
+			.then((user) => {
+				if (!user) {
+					return res.status(401).send({
+						errorMessage: "Authentication Failed. Operation Abandoned.",
+					});
+				}
+				req.USER = user;
+
+				return next();
+			})
+			.catch((err2) => next(err2));
+	}
+
 	isAutheticated() {
 		return compose()
 			.use((req: Request, res: Response, next: NextFunction) => {
 				if (req.user) {
-					(req as any).USER = req.user;
-					(req as any).token = AuthService.signToken(req.user);
-					(req as any).tokenExpireDate = "24 Hr";
-					next();
+					this.getUserDetail(req as IUserRequest, res, next);
+
 					return;
 				}
 
@@ -174,36 +172,7 @@ export default class AuthService {
 						.status(401)
 						.send({ "Error Message": "Unauthorized Access" });
 				}
-
-				console.info("==================");
-				console.info("==================");
-				console.info("==================");
-				console.warn("first");
-				console.info("==================");
-				console.info("==================");
-				console.info("==================");
-				User.findById(req.user._id)
-					.exec()
-					.then((user) => {
-						if (!user) {
-							return res.status(401).send({
-								errorMessage: "Authentication Failed. Operation Abandoned.",
-							});
-						}
-						req.incUsersId = req.user.incUsersId;
-						// req.userTag = user.userTag;
-						// console.log('user.incUsersId = req.user.incUsersId', user.incUsersId, req.user.incUsersId);
-						req.USER = user;
-
-						return next();
-
-						// console.log('POWER', _.merge(user, { incUsersId: req.user.incUsersId }));
-						// console.log('REQ USER', req.user);
-						// req.user = _.merge(req.user, user);
-						// console.log('IS AUTHENTICATED', user);
-						// return injectFilter(req, res, next);
-					})
-					.catch((err2) => next(err2));
+				return this.getUserDetail(req, res, next);
 			});
 	}
 
@@ -235,9 +204,6 @@ export default class AuthService {
 				}
 			);
 		} else {
-			console.warn("No Token");
-			// if there is no token
-			// return an error
 			return res.status(403).send({
 				error: true,
 				message: "No token provided.",
@@ -251,11 +217,6 @@ export default class AuthService {
 		_next: NextFunction
 	) => {
 		if (req.decoded) {
-			// console.log('==========================');
-			// console.log('++++++++++++++++++++++++++');
-			// console.log(req.decoded);
-			// console.log('++++++++++++++++++++++++++');
-			// console.log('==========================');
 			const user = req.decoded;
 			//  Generate New Token
 			const token = AuthService.signToken(user);

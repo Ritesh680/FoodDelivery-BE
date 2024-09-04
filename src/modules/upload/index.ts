@@ -21,11 +21,11 @@ const storage = multer.diskStorage({
 		cb(null, Date.now() + "-" + file.originalname);
 	},
 });
-const upload = multer({ storage: storage, dest: uploadsDir });
+export const fileUpload = multer({ storage: storage, dest: uploadsDir });
 
 uploadRouter.post(
 	"/upload",
-	upload.single("file"),
+	fileUpload.single("file"),
 	uploadController.uploadFile
 );
 uploadRouter.delete("/:filename", uploadController.deleteFile);
