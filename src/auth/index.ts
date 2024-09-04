@@ -31,7 +31,6 @@ router.get(
 
 router.post(
 	"/local/login",
-	authService.isAutheticated(),
 	authService.localLogin,
 	authService.manageUser,
 	authService.returnUserData

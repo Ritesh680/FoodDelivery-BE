@@ -99,6 +99,10 @@ export default class AuthService {
 			if (err) {
 				return next(err);
 			}
+			res.status(200).json({
+				success: true,
+				message: "User has been logged out",
+			});
 		});
 	};
 
