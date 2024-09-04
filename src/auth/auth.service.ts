@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { expressjwt } from "express-jwt";
 import User from "../modules/user/user.model";
 import * as jwt from "jsonwebtoken";
-
+//@ts-ignore
 import compose from "composable-middleware";
 
 import passport from "passport";
