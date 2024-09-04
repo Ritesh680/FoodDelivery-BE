@@ -32,6 +32,7 @@ app.use(
 			maxAge: 1000 * 60 * 60 * 24 * 7,
 			signed: true,
 			httpOnly: true,
+			sameSite: "none",
 		},
 		store: MongoStore.create({ mongoUrl: config.database_URI }),
 	})
