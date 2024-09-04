@@ -27,6 +27,10 @@ export default () => {
 		googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
 		googleCallbackURL: process.env.GOOGLE_CALLBACK_URL,
 
+		facebookClientId: process.env.FACEBOOK_CLIENT_ID ?? "",
+		facebookClientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? "",
+		facebookCallbackURL: process.env.FACEBOOK_CALLBACK_URL ?? "",
+
 		clientUrl: process.env.CLIENT_URL,
 		tokenLife: 60 * 60 * 24,
 		refreshTokenLife: 60 * 60 * 24 * 7,

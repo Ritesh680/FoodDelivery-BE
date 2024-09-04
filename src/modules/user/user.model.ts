@@ -2,7 +2,7 @@
 import mongoose, { Callback } from "mongoose";
 import * as crypto from "crypto";
 
-const authTypes = ["github", "twitter", "facebook", "google"];
+const authTypes = ["facebook", "google"];
 
 export interface IUserDocument extends mongoose.Document {
 	name: string;
@@ -11,6 +11,7 @@ export interface IUserDocument extends mongoose.Document {
 	password: string;
 	role: string;
 	provider: string;
+	picture: string;
 	salt: string;
 	authenticate: (
 		password: string,
@@ -48,7 +49,6 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 				return false;
 			}
 		},
-		nullable: true,
 	},
 	password: {
 		type: String,
@@ -65,6 +65,9 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 		type: String,
 		default: "user",
 		enum: ["user", "admin"],
+	},
+	picture: {
+		type: String,
 	},
 	salt: String,
 });
@@ -97,6 +100,27 @@ UserSchema.path("email").validate(function (value) {
 			throw err;
 		});
 }, "The specified email address is already in use.");
+// Validate phone is not taken
+UserSchema.path("phone").validate(function (value) {
+	if (authTypes.indexOf(this.provider) !== -1) {
+		return true;
+	}
+
+	return this.collection
+		.findOne({ phone: value })
+		.then((user) => {
+			if (user) {
+				if (this.id === user.id) {
+					return true;
+				}
+				return false;
+			}
+			return true;
+		})
+		.catch(function (err) {
+			throw err;
+		});
+}, "The specified Phone Number is already in use.");
 // Validate email is not taken e
 
 /**

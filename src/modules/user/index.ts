@@ -16,4 +16,6 @@ userRouter.post(
 	controller.newUser
 );
 
+userRouter.post("/image", controller.updateProfileImage);
+
 export default userRouter;

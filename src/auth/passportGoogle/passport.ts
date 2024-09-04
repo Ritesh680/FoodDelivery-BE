@@ -25,6 +25,7 @@ const setupGoogle = (User: mongoose.Model<IUserDocument>) => {
 								email: profile._json.email,
 								provider: "google",
 								phone: null,
+								picture: profile._json.picture,
 							});
 							newUser.save().then((newUser) => {
 								done(null, newUser);

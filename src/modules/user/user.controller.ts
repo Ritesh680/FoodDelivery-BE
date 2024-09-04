@@ -57,8 +57,33 @@ export default class UsersCtrl {
 				res.json(user);
 			})
 			.catch((err) => {
-				console.log({ err });
 				res.status(400).json(err);
 			});
+	};
+
+	updateProfileImage = async (req: Request, res: Response) => {
+		const { profileImage } = req.body;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const userId = (req.user as any)?._id;
+		if (!userId) {
+			return res.status(400).json({
+				success: false,
+				message: "UserId not found",
+			});
+		}
+		try {
+			const user = await this.userModel.findById(userId).exec();
+			if (user) {
+				user.picture = profileImage;
+				await user.save();
+				return res.json(user);
+			} else {
+				return res
+					.status(404)
+					.json({ success: false, message: "User not found" });
+			}
+		} catch (error) {
+			return res.status(500).json({ success: false, message: error });
+		}
 	};
 }

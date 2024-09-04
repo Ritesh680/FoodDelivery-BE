@@ -14,7 +14,7 @@ import Config from "../config/config";
 const config = Config();
 
 const validateJwt = expressjwt({
-	secret: config.secrets.session,
+	secret: config.secret,
 	algorithms: ["HS256"],
 });
 
@@ -57,11 +57,19 @@ export default class AuthService {
 	refreshTokensList = {};
 
 	googleAuthenticate = passport.authenticate("google", {
-		scope: ["profile", "email"],
+		scope: ["profile", "email", "phone"],
+	});
+
+	facebookAuthenticate = passport.authenticate("facebook", {
+		scope: ["profile", "email", "phone"],
+	});
+	facebookCallbackLogin = passport.authenticate("facebook", {
+		failureRedirect: "/auth/login/failure",
+		successRedirect: config.clientUrl,
 	});
 
 	googleCallbackLogin = passport.authenticate("google", {
-		failureRedirect: "/login/failure",
+		failureRedirect: "/auth/login/failure",
 		successRedirect: config.clientUrl,
 	});
 
@@ -74,7 +82,6 @@ export default class AuthService {
 
 	googleLoginSuccess = (req: Request, res: Response, next: NextFunction) => {
 		if (req.user) {
-			console.log({ ...(req.user as any) });
 			(req as any).USER = req.user;
 			(req as any).token = AuthService.signToken(req.user);
 			(req as any).tokenExpireDate = "24 Hr";
@@ -171,13 +178,12 @@ export default class AuthService {
 				validateJwt(req, res, next);
 			})
 			.use((err: any, req: IUserRequest, res: Response, next: NextFunction) => {
-				if (err && err.status === 401) {
+				if (req.isUnauthenticated() && err && err.status === 401) {
 					return res
 						.status(401)
 						.send({ "Error Message": "Unauthorized Access" });
 				}
 
-				console.log(" req.user.incUsersId", req.user.incUsersId);
 				User.findById(req.user._id)
 					.select("firstName lastName email role")
 					.exec()
@@ -187,7 +193,6 @@ export default class AuthService {
 								errorMessage: "Authentication Failed. Operation Abandoned.",
 							});
 						}
-						console.log("REQUESTED USER", user);
 						req.incUsersId = req.user.incUsersId;
 						// req.userTag = user.userTag;
 						// console.log('user.incUsersId = req.user.incUsersId', user.incUsersId, req.user.incUsersId);
@@ -223,7 +228,7 @@ export default class AuthService {
 				config.tokenSecrets.session,
 				function (err: any, decoded: any) {
 					if (err) {
-						console.log("No Token Unauthorized access. ", err);
+						console.warn("No Token Unauthorized access. ", err);
 						return res
 							.status(401)
 							.json({ error: true, message: "Unauthorized access." });
@@ -233,7 +238,7 @@ export default class AuthService {
 				}
 			);
 		} else {
-			console.log("No Token");
+			console.warn("No Token");
 			// if there is no token
 			// return an error
 			return res.status(403).send({
@@ -276,6 +281,7 @@ export default class AuthService {
 			name: (req as any).USER.name,
 			email: (req as any).USER.email,
 			phone: (req as any).USER.phone,
+			picture: (req as any).USER.picture,
 		};
 
 		return next();
@@ -284,6 +290,7 @@ export default class AuthService {
 	returnUserData = (req: Request, res: Response, _next: NextFunction) => {
 		// console.log('req---FILTERED_USER_DEATIL');
 		const response = {
+			success: true,
 			status: "Logged in",
 			token: (req as any).token,
 			user: (req as any).FILTERED_USER_DEATIL,

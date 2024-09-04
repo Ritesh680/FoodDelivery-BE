@@ -19,6 +19,8 @@ export default [
 					ignoreRestSiblings: true,
 				},
 			],
+			"@typescript-eslint/no-unused-expressions": "error",
+			"no-console": ["error", { allow: ["warn", "info"] }],
 		},
 	},
 ];
