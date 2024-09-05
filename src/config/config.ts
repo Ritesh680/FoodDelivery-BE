@@ -12,6 +12,8 @@ export default () => {
 		awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 		awsRegion: process.env.AWS_REGION,
 
+		isDev: process.env.DEVELOPMENT == "0",
+
 		secret: process.env.SECRET ?? "secret",
 		secrets: {
 			session: process.env.SESSION_SECRET ?? "session-secret",

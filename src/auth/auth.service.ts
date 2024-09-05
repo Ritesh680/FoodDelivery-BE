@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
 import { expressjwt } from "express-jwt";
-import User from "../modules/user/user.model";
+import User, { IUserDocument } from "../modules/user/user.model";
 import * as jwt from "jsonwebtoken";
 
 //@ts-expect-error the type of composable middleware is unavailable in the registry
@@ -17,7 +17,10 @@ const config = Config();
 const validateJwt = expressjwt({
 	secret: config.tokenSecrets.session,
 	algorithms: ["HS256"],
+	credentialsRequired: true,
 });
+
+const jwtBlackList: string[] = [];
 
 // const jwtUserInfo = expressjwt({
 // 	secret: config.secrets.session,
@@ -54,7 +57,7 @@ export default class AuthService {
 
 	googleCallbackLogin = passport.authenticate("google", {
 		failureRedirect: "/auth/login/failure",
-		successRedirect: config.clientUrl,
+		successRedirect: config.clientUrl + "/?authenticated=true",
 	});
 
 	googleLoginFailure = (req: Request, res: Response) => {
@@ -83,6 +86,8 @@ export default class AuthService {
 			if (err) {
 				return next(err);
 			}
+
+			jwtBlackList.push(req.headers.authorization?.split(" ")[1] ?? "");
 			res.status(200).json({
 				success: true,
 				message: "User has been logged out",
@@ -90,10 +95,40 @@ export default class AuthService {
 		});
 	};
 
-	localLogin = passport.authenticate("local", {
-		successRedirect: "/",
-		failureRedirect: "/auth/login/failure",
-	});
+	localLogin = (req: Request, res: Response, next: NextFunction) => {
+		return passport.authenticate(
+			"local",
+			{
+				session: true,
+				failureRedirect: "/auth/login/failure",
+				userProperty: "auth",
+				assignProperty: "user",
+
+				keepSessionInfo: true,
+				passReqToCallback: true,
+				successRedirect: "/",
+			},
+			(err: any, user: IUserDocument, info: { message: string }) => {
+				const error = err || info;
+				if (error) {
+					return res.status(401).json(error);
+				}
+				if (!user) {
+					return res.status(404).json({
+						message: "Something went wrong, please try again.",
+					});
+				}
+				User.findById(user._id)
+					.exec()
+					.then((usr) => {
+						(req as any).token = AuthService.signToken(usr);
+						(req as any).tokenExpireDate = "24 Hr";
+						(req as any).USER = usr;
+						return next();
+					});
+			}
+		)(req, res, next);
+	};
 
 	static signToken(user: any) {
 		return jwt.sign(
@@ -119,29 +154,18 @@ export default class AuthService {
 		);
 	}
 
-	getUserDetail(req: IUserRequest, res: Response, next: NextFunction) {
-		User.findById(req.user._id)
-			.exec()
-			.then((user) => {
-				if (!user) {
-					return res.status(401).send({
-						errorMessage: "Authentication Failed. Operation Abandoned.",
-					});
-				}
-				req.USER = user;
-
-				return next();
-			})
-			.catch((err2) => next(err2));
-	}
-
 	isAutheticated() {
 		return compose()
 			.use((req: Request, res: Response, next: NextFunction) => {
 				if (req.user) {
-					this.getUserDetail(req as IUserRequest, res, next);
+					(req as any).USER = req.user;
+					(req as any).token = AuthService.signToken(req.user);
+					(req as any).tokenExpireDate = "24 Hr";
+					return next();
+				}
 
-					return;
+				if ((req as any).auth) {
+					req.user = (req as any).auth;
 				}
 
 				if (
@@ -164,15 +188,43 @@ export default class AuthService {
 						.status(401)
 						.send({ "Error Message": "No Authorization Token Found" });
 				}
-				validateJwt(req, res, next);
+				if (jwtBlackList.includes(req.headers.authorization.split(" ")[1])) {
+					res.status(403).json({ message: "User Authentication failed" });
+					return;
+				}
+				validateJwt(req, res, next).then(async () => {
+					if ((req as any).auth) req.user = (req as any).auth;
+				});
 			})
 			.use((err: any, req: IUserRequest, res: Response, next: NextFunction) => {
-				if (req.isUnauthenticated() && err && err.status === 401) {
+				if (err && err.status === 401) {
 					return res
 						.status(401)
 						.send({ "Error Message": "Unauthorized Access" });
 				}
-				return this.getUserDetail(req, res, next);
+				User.findById(req.user._id)
+					.select("firstName lastName email role")
+					.exec()
+					.then((user) => {
+						if (!user) {
+							return res.status(401).send({
+								errorMessage: "Authentication Failed. Operation Abandoned.",
+							});
+						}
+						req.incUsersId = req.user.incUsersId;
+						// req.userTag = user.userTag;
+						// console.log('user.incUsersId = req.user.incUsersId', user.incUsersId, req.user.incUsersId);
+						req.user = user;
+
+						return next();
+
+						// console.log('POWER', _.merge(user, { incUsersId: req.user.incUsersId }));
+						// console.log('REQ USER', req.user);
+						// req.user = _.merge(req.user, user);
+						// console.log('IS AUTHENTICATED', user);
+						// return injectFilter(req, res, next);
+					})
+					.catch((err2) => next(err2));
 			});
 	}
 
@@ -229,11 +281,20 @@ export default class AuthService {
 		}
 	};
 
-	manageUser = (req: Request, res: Response, next: NextFunction) => {
+	manageUser = async (req: Request, res: Response, next: NextFunction) => {
 		// console.log('--TODO-- : Delete Un-necessary key from here like password and other Stuff');
-
+		const auth = (req as any).auth;
+		if (auth) {
+			await User.findById(auth._id)
+				.exec()
+				.then((user) => {
+					if (user) {
+						(req as any).USER = user;
+					}
+				});
+		}
 		(req as any).FILTERED_USER_DEATIL = {
-			role: (req as any).USER.role ?? "user",
+			role: (req as any).USER?.role ?? "user",
 			_id: (req as any).USER._id,
 			createdAt: (req as any).USER.createdAt,
 			name: (req as any).USER.name,

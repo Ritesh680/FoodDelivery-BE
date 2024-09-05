@@ -43,14 +43,12 @@ class CartController {
 					cart.products.push({ product: productId, quantity });
 				}
 				await cart.save();
-				return res
-					.status(200)
-					.json({
-						success: true,
-						data: cart.products.find(
-							(product) => String(product.product) == String(productId)
-						),
-					});
+				return res.status(200).json({
+					success: true,
+					data: cart.products.find(
+						(product) => String(product.product) == String(productId)
+					),
+				});
 			} else {
 				const newCart = new this.cart({
 					user: userId,

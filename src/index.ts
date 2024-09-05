@@ -16,7 +16,11 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: [config.clientUrl ?? "", "http://localhost:5173"],
+	origin: [
+		"https://food-delivery-fe-git-main-ritesh-paudels-projects.vercel.app",
+		"http://localhost:5173",
+		"http://192.168.123.5:5173",
+	],
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
 };
@@ -39,7 +43,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-passport.authenticate("session");
 
 db.on("error", console.warn.bind(console, "connection error:"));
 db.once("open", async () => {
@@ -54,6 +57,7 @@ db.once("open", async () => {
 			res.status(500).json({ message: "An unexpected error occurred" });
 		}
 	});
+
 	app.use("/", router);
 
 	app.listen(port, () => {

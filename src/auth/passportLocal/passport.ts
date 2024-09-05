@@ -28,7 +28,7 @@ const setupPassport = (User: mongoose.Model<IUserDocument>) => {
 									message: "Incorrect Password",
 								});
 							} else {
-								return cb(null, user, { message: "Logged in successfully" });
+								return cb(null, user);
 							}
 						});
 					})
@@ -38,19 +38,6 @@ const setupPassport = (User: mongoose.Model<IUserDocument>) => {
 			}
 		)
 	);
-
-	passport.serializeUser(function (user, done) {
-		process.nextTick(function () {
-			done(null, user);
-		});
-	});
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	passport.deserializeUser(function (user: any, done) {
-		process.nextTick(function () {
-			done(null, user);
-		});
-	});
 };
 
 export default setupPassport;

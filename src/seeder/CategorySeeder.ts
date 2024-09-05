@@ -7,6 +7,7 @@ const CategoryData = [
 ];
 async function seedCategory() {
 	try {
+		await Category.deleteMany({});
 		Category.insertMany(CategoryData).then(() => {
 			console.info("Category Data Seeded");
 			process.exit(0);

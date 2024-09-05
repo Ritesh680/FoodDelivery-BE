@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Cart from "./cart.model";
 
 // {
@@ -43,8 +44,9 @@ import Cart from "./cart.model";
 class CartService {
 	cart = Cart;
 	getCartItems(userId: string) {
+		// return this.cart.find({ user: new mongoose.Types.ObjectId(userId) });
 		return this.cart.aggregate([
-			{ $match: { user: userId } },
+			{ $match: { user: new mongoose.Types.ObjectId(userId) } },
 			{
 				$unwind: "$products",
 			},
