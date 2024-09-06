@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import Product from "./product.model";
+import productService from "./product.service";
 
 class ProductController {
 	productModal = Product;
@@ -40,14 +41,20 @@ class ProductController {
 	};
 
 	getProducts = async (req: Request, res: Response) => {
-		const products = await this.productModal.find().exec();
-		res.status(200).json({ success: true, data: products });
+		return productService
+			.getAll()
+			.then((products) => {
+				res.status(200).json({ success: true, data: products });
+			})
+			.catch((err) => {
+				res.status(500).json({ success: false, message: err });
+			});
 	};
 
 	getProductById = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const product = await this.productModal.findById(id).exec();
-		res.status(200).json({ success: true, data: product });
+		const product = await productService.getById(id);
+		res.status(200).json({ success: true, data: product[0] });
 	};
 
 	updateProduct = async (req: Request, res: Response) => {

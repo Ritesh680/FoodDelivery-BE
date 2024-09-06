@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import Category from "./category.model";
 import fs from "fs";
 import path from "path";
+import categoryService from "./category.service";
 
 class CategoryController {
 	categoryModal = Category;
@@ -29,14 +30,26 @@ class CategoryController {
 	};
 
 	getCategories = async (req: Request, res: Response) => {
-		const category = await this.categoryModal.find().exec();
-		res.status(200).json({ success: true, data: category });
+		return categoryService
+			.getAll()
+			.then((categories) => {
+				res.status(200).json({ success: true, data: categories });
+			})
+			.catch((err) => {
+				res.status(500).json({ success: false, message: err });
+			});
 	};
 
 	getCategoryById = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const category = await this.categoryModal.findById(id).exec();
-		res.status(200).json({ success: true, data: category });
+		categoryService
+			.getById(id)
+			.then((category) => {
+				res.status(200).json({ success: true, data: category[0] });
+			})
+			.catch((err) => {
+				res.status(500).json({ success: false, message: err });
+			});
 	};
 
 	deleteCategory = async (req: Request, res: Response) => {

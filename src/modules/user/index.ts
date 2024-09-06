@@ -2,7 +2,6 @@ import express from "express";
 import UserCtrl from "./user.controller";
 import { bodyValidator } from "../../middleware/zod.validator";
 import { createUserDTO } from "./user.validaton";
-import { fileUpload } from "../upload";
 
 const controller = new UserCtrl();
 const userRouter = express.Router();
@@ -19,7 +18,7 @@ userRouter.post(
 
 userRouter.post(
 	"/image",
-	fileUpload.single("profileImage"),
+	// fileUpload.single("profileImage"),
 	controller.updateProfileImage
 );
 

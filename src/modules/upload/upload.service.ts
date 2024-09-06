@@ -1,9 +1,36 @@
 import fs from "fs";
 import path from "path";
 import CustomError from "../../@types/CustomError";
+import cloudinary from "../../cloudinary";
 class UploadService {
-	async uploadFile() {
+	async uploadFile(path: string) {
 		// file upload logic
+		return cloudinary.uploader.upload(path, (err, result) => {
+			if (err) {
+				throw new CustomError({ status: 500, message: err?.message });
+			}
+			return result;
+		});
+	}
+
+	async getFileById(id: string) {
+		// file get logic
+		return cloudinary.api.resource(id, (err, result) => {
+			if (err) {
+				throw new CustomError({ status: 500, message: err?.message });
+			}
+			return result;
+		});
+	}
+
+	async deleteFileById(id: string) {
+		// file delete logic
+		return cloudinary.uploader.destroy(id, (err, result) => {
+			if (err) {
+				throw new CustomError({ status: 500, message: err?.message });
+			}
+			return result;
+		});
 	}
 
 	async deleteFile(filename: string) {

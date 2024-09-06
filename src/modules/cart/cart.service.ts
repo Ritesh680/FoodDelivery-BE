@@ -62,6 +62,14 @@ class CartService {
 				$unwind: "$products.product",
 			},
 			{
+				$lookup: {
+					from: "images",
+					localField: "products.product.image",
+					foreignField: "fileId",
+					as: "products.product.image",
+				},
+			},
+			{
 				$group: {
 					_id: "$_id",
 					user: { $first: "$user" },

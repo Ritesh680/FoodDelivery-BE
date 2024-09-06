@@ -64,7 +64,7 @@ export default class UsersCtrl {
 	};
 
 	updateProfileImage = async (req: Request, res: Response) => {
-		const file = req.file?.filename;
+		// const file = req.file?.filename;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)?._id;
 		if (!userId) {
@@ -74,18 +74,23 @@ export default class UsersCtrl {
 			});
 		}
 
-		await this.userModel
-			.findByIdAndUpdate(userId, { picture: file })
-			.exec()
-			.then((user) => {
-				if (user) {
-					this.removeUserImage(user);
-					res.status(200).json(user);
-				}
-			})
-			.catch((error) =>
-				res.status(500).json({ success: false, message: error })
-			);
+		// await this.userModel
+		// 	.findByIdAndUpdate(userId, { picture: file })
+		// 	.exec()
+		// 	.then((user) => {
+		// 		if (user) {
+		// 			this.removeUserImage(user);
+		// 			res.status(200).json(user);
+		// 		}
+		// 	})
+		// 	.catch((error) =>
+		// 		res.status(500).json({ success: false, message: error })
+		// 	);
+
+		res.json({
+			success: false,
+			message: "Cannot update profile image at the moment",
+		});
 	};
 
 	removeUserImage = async (user: IUserDocument) => {

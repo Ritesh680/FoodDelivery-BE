@@ -4,11 +4,35 @@ import CustomError from "../../@types/CustomError";
 
 class ProductService {
 	product = Product;
-	async getById(id: number) {
-		if (!mongoose.Types.ObjectId.isValid(id)) {
-			throw new CustomError({ message: "Invalid product id", status: 400 });
+	async getById(id: string) {
+		const product = this.product.aggregate([
+			{ $match: { _id: new mongoose.Types.ObjectId(id) } },
+			{
+				$lookup: {
+					from: "images",
+					localField: "image",
+					foreignField: "fileId",
+					as: "image",
+				},
+			},
+		]);
+		if (!product) {
+			throw new CustomError({ status: 404, message: "Product not found" });
 		}
-		return this.product.findOne({ _id: new mongoose.Types.ObjectId(id) });
+		return product;
+	}
+
+	getAll() {
+		return this.product.aggregate([
+			{
+				$lookup: {
+					from: "images",
+					localField: "image",
+					foreignField: "fileId",
+					as: "image",
+				},
+			},
+		]);
 	}
 }
 const productService = new ProductService();

@@ -36,6 +36,7 @@
 	"dependencies": {
 		"@typescript-eslint/eslint-plugin": "^8.3.0",
 		"@typescript-eslint/parser": "^8.3.0",
+		"cloudinary": "^2.4.0",
 		"composable-middleware": "^0.3.1",
 		"connect-mongo": "^5.1.0",
 		"cors": "^2.8.5",

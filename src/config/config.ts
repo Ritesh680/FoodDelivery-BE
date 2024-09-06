@@ -36,6 +36,12 @@ export default () => {
 		clientUrl: process.env.CLIENT_URL,
 		tokenLife: 60 * 60 * 24,
 		refreshTokenLife: 60 * 60 * 24 * 7,
+
+		cloudinary: {
+			cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+			apiKey: process.env.CLOUDINARY_API_KEY,
+			apiSecret: process.env.CLOUDINARY_API_SECRET,
+		},
 	};
 	return envVars;
 };
