@@ -33,15 +33,18 @@ class UserService {
 				},
 			},
 			{
-				$unwind: "$picture",
-			},
-			{
 				$project: {
 					_id: 1,
 					name: 1,
 					email: 1,
 					phone: 1,
-					picture: "$picture.url",
+					picture: {
+						$cond: {
+							if: { $gt: [{ $size: "$picture" }, 0] },
+							then: { $arrayElemAt: ["$picture.url", 0] },
+							else: null,
+						},
+					},
 					role: 1,
 				},
 			},

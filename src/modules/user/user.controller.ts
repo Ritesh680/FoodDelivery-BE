@@ -84,34 +84,38 @@ export default class UsersCtrl {
 			});
 		}
 
-		imageService
-			.addFile(file)
-			.then((result) => {
-				fileService.deleteFile(file.filename);
+		try {
+			const result = await imageService.addFile(file);
+			fileService.deleteFile(file.filename);
 
-				const picture = result.fileId;
-				this.userModel
-					.findById(new mongoose.Types.ObjectId(userId))
-					.exec()
-					.then((result) => {
-						if (result) {
-							const oldPictureId = result.picture;
-							result.picture = picture;
-							result.save().then(() => imageService.deleteFile(oldPictureId));
-							res.status(200).json({
-								success: true,
-								message: "Profile Image Updated",
-								data: result,
-							});
-						} else {
-							res.status(404).json({
-								success: false,
-								message: "User not found",
-							});
-						}
+			const picture = result.fileId;
+			const user = await this.userModel
+				.findById(new mongoose.Types.ObjectId(userId))
+				.exec();
+
+			if (user) {
+				const oldPictureId = user.picture;
+				user.picture = picture;
+				try {
+					await user.save();
+					await imageService.deleteFile(oldPictureId);
+					res.status(200).json({
+						success: true,
+						message: "Profile Image Updated",
+						data: user,
 					});
-			})
-			.catch((err) => res.status(500).json({ message: err.message }));
+				} catch (err) {
+					res.status(400).json(err);
+				}
+			} else {
+				res.status(404).json({
+					success: false,
+					message: "User not found",
+				});
+			}
+		} catch (err) {
+			res.status(500).json({ err });
+		}
 	};
 
 	removeUserImage = async (user: IUserDocument) => {
