@@ -2,9 +2,12 @@ import express from "express";
 import UserCtrl from "./user.controller";
 import { bodyValidator } from "../../middleware/zod.validator";
 import { createUserDTO } from "./user.validaton";
+import AuthService from "../../auth/auth.service";
+import { fileUpload } from "../upload";
 
 const controller = new UserCtrl();
 const userRouter = express.Router();
+const authService = new AuthService();
 
 userRouter.get("/", controller.getAll);
 userRouter.post(
@@ -16,7 +19,8 @@ userRouter.post(
 
 userRouter.post(
 	"/image",
-	// fileUpload.single("profileImage"),
+	authService.isAutheticated(),
+	fileUpload.single("profileImage"),
 	controller.updateProfileImage
 );
 

@@ -3,6 +3,8 @@ import User, { IUserDocument } from "./user.model";
 import fileService from "../upload/upload.service";
 import CustomError from "../../@types/CustomError";
 import userService from "./user.service";
+import imageService from "../images/image.service";
+import mongoose from "mongoose";
 
 export default class UsersCtrl {
 	userModel = User;
@@ -67,6 +69,7 @@ export default class UsersCtrl {
 	updateProfileImage = async (req: Request, res: Response) => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)?._id;
+		const file = req.file;
 		if (!userId) {
 			return res.status(400).json({
 				success: false,
@@ -74,10 +77,41 @@ export default class UsersCtrl {
 			});
 		}
 
-		res.json({
-			success: false,
-			message: "Cannot update profile image at the moment",
-		});
+		if (!file) {
+			return res.status(400).json({
+				success: false,
+				message: "No file uploaded",
+			});
+		}
+
+		imageService
+			.addFile(file)
+			.then((result) => {
+				fileService.deleteFile(file.filename);
+
+				const picture = result.fileId;
+				this.userModel
+					.findById(new mongoose.Types.ObjectId(userId))
+					.exec()
+					.then((result) => {
+						if (result) {
+							const oldPictureId = result.picture;
+							result.picture = picture;
+							result.save().then(() => imageService.deleteFile(oldPictureId));
+							res.status(200).json({
+								success: true,
+								message: "Profile Image Updated",
+								data: result,
+							});
+						} else {
+							res.status(404).json({
+								success: false,
+								message: "User not found",
+							});
+						}
+					});
+			})
+			.catch((err) => res.status(500).json({ message: err.message }));
 	};
 
 	removeUserImage = async (user: IUserDocument) => {
@@ -95,5 +129,30 @@ export default class UsersCtrl {
 			.getAll(req)
 			.then((result) => res.status(200).json({ success: true, data: result }))
 			.catch((err) => res.status(500).json({ err }));
+	};
+
+	updateUser = async (req: Request, res: Response) => {
+		const { id } = req.params;
+		if (!id) {
+			res.status(400).json({ success: false, message: "id is required" });
+			return;
+		}
+		const { name, email, phone, password, role, picture } = req.body;
+
+		const updatedUser = await this.userModel
+			.findByIdAndUpdate(
+				id,
+				{
+					name,
+					email,
+					phone,
+					password,
+					role,
+					picture,
+				},
+				{ new: true }
+			)
+			.exec();
+		res.status(200).json({ success: true, data: updatedUser });
 	};
 }

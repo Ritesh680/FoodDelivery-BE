@@ -11,6 +11,7 @@ import passport from "passport";
 // import randtoken from "rand-token";
 import * as _ from "lodash";
 import Config from "../config/config";
+import userService from "../modules/user/user.service";
 
 const config = Config();
 
@@ -284,12 +285,13 @@ export default class AuthService {
 	manageUser = async (req: Request, res: Response, next: NextFunction) => {
 		// console.log('--TODO-- : Delete Un-necessary key from here like password and other Stuff');
 		const auth = (req as any).auth;
-		if (auth) {
-			await User.findById(auth._id)
-				.exec()
+
+		if (auth || req.user) {
+			await userService
+				.getUserById(auth?._id ?? (req.user as any)?._id)
 				.then((user) => {
 					if (user) {
-						(req as any).USER = user;
+						(req as any).USER = user[0];
 					}
 				});
 		}
