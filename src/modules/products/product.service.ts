@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Product from "./product.model";
 import CustomError from "../../@types/CustomError";
+import { Request } from "express";
 
 class ProductService {
 	product = Product;
@@ -33,7 +34,6 @@ class ProductService {
 						: [],
 				},
 			},
-			{ $unwind: "$cart" },
 			{
 				$project: {
 					_id: 1,
@@ -44,7 +44,13 @@ class ProductService {
 					quantity: 1,
 					image: 1,
 					discountedPrice: 1,
-					cart: "$cart.cart",
+					cart: {
+						$cond: {
+							if: { $gt: [{ $size: "$cart" }, 0] },
+							then: { $arrayElemAt: ["$cart.cart", 0] },
+							else: null,
+						},
+					},
 				},
 			},
 		]);
@@ -54,8 +60,16 @@ class ProductService {
 		return product;
 	}
 
-	getAll() {
+	getAll(req: Request) {
+		const { search } = req.query;
 		return this.product.aggregate([
+			{
+				$match: {
+					name: {
+						$regex: new RegExp(search as string, "i"),
+					},
+				},
+			},
 			{
 				$lookup: {
 					from: "images",

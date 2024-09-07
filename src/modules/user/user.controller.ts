@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import User, { IUserDocument } from "./user.model";
 import fileService from "../upload/upload.service";
 import CustomError from "../../@types/CustomError";
+import userService from "./user.service";
 
 export default class UsersCtrl {
 	userModel = User;
@@ -64,7 +65,6 @@ export default class UsersCtrl {
 	};
 
 	updateProfileImage = async (req: Request, res: Response) => {
-		// const file = req.file?.filename;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)?._id;
 		if (!userId) {
@@ -73,19 +73,6 @@ export default class UsersCtrl {
 				message: "UserId not found",
 			});
 		}
-
-		// await this.userModel
-		// 	.findByIdAndUpdate(userId, { picture: file })
-		// 	.exec()
-		// 	.then((user) => {
-		// 		if (user) {
-		// 			this.removeUserImage(user);
-		// 			res.status(200).json(user);
-		// 		}
-		// 	})
-		// 	.catch((error) =>
-		// 		res.status(500).json({ success: false, message: error })
-		// 	);
 
 		res.json({
 			success: false,
@@ -104,9 +91,8 @@ export default class UsersCtrl {
 	};
 
 	getAll = async (req: Request, res: Response) => {
-		return this.userModel
-			.find({})
-			.exec()
+		return userService
+			.getAll(req)
 			.then((result) => res.status(200).json({ success: true, data: result }))
 			.catch((err) => res.status(500).json({ err }));
 	};

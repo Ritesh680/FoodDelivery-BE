@@ -42,7 +42,7 @@ class ProductController {
 
 	getProducts = async (req: Request, res: Response) => {
 		return productService
-			.getAll()
+			.getAll(req)
 			.then((products) => {
 				res.status(200).json({ success: true, data: products });
 			})
