@@ -6,9 +6,7 @@ import { createUserDTO } from "./user.validaton";
 const controller = new UserCtrl();
 const userRouter = express.Router();
 
-userRouter.get("/", (req, res) => {
-	res.send("Hello User");
-});
+userRouter.get("/", controller.getAll);
 userRouter.post(
 	"/",
 	bodyValidator(createUserDTO),

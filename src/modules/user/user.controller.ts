@@ -102,4 +102,12 @@ export default class UsersCtrl {
 			throw new CustomError(err);
 		});
 	};
+
+	getAll = async (req: Request, res: Response) => {
+		return this.userModel
+			.find({})
+			.exec()
+			.then((result) => res.status(200).json({ success: true, data: result }))
+			.catch((err) => res.status(500).json({ err }));
+	};
 }

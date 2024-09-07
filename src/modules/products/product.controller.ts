@@ -53,7 +53,13 @@ class ProductController {
 
 	getProductById = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const product = await productService.getById(id);
+		if (!id) {
+			res.status(400).json({ success: false, message: "id is required" });
+			return;
+		}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const userId = (req.user as any)?._id;
+		const product = await productService.getById(id, userId);
 		res.status(200).json({ success: true, data: product[0] });
 	};
 
