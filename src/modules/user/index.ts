@@ -24,4 +24,6 @@ userRouter.post(
 	controller.updateProfileImage
 );
 
+userRouter.put("/:id", controller.updateUser);
+
 export default userRouter;
