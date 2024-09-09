@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import seedCategory from "./CategorySeeder";
 import config from "../config/config";
-import seedUser from "./UserSeeder";
+import seedProducts from "./ProductSeeder";
 
 async function seed() {
 	await mongoose.connect(config().database_URI || "");
-	await seedUser().then(() => {
-		seedCategory();
-	});
+
+	await seedCategory();
+	await seedProducts();
 }
 
 seed();

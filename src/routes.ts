@@ -6,6 +6,7 @@ import uploadRouter from "./modules/upload";
 import productRouter from "./modules/products";
 import categoryRouter from "./modules/categories";
 import cartRouter from "./modules/cart";
+import locationRoutes from "./modules/location";
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -18,5 +19,6 @@ router.use("/file", uploadRouter);
 router.use("/product", productRouter);
 router.use("/category", categoryRouter);
 router.use("/cart", cartRouter);
+router.use("/location", locationRoutes);
 
 export default router;

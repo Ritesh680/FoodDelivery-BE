@@ -4,7 +4,13 @@ const CategoryData = [
 	{ name: "Chicken", image: "cec496496ac-Chicken.jpeg" },
 	{ name: "Mutton", image: "a1f0b7d4aa-Mutton.png" },
 	{ name: "Buff", image: "9ab5acf4-Buff.png" },
+	{ name: "Pork", image: "pork-image.jpg" }, // New Category
+	{ name: "Fish", image: "fish-image.jpg" }, // New Category
+	{ name: "Seafood", image: "seafood-image.jpg" }, // New Category
+	{ name: "Vegetables", image: "vegetables-image.jpg" }, // New Category
+	{ name: "Fruits", image: "fruits-image.jpg" }, // New Category
 ];
+
 async function seedCategory() {
 	try {
 		await Category.deleteMany({});

@@ -17,7 +17,7 @@ class CategoryService {
 					as: "image",
 				},
 			},
-			{ $unwind: "$image" },
+			// { $unwind: "$image" },
 		]);
 		if (!category) {
 			throw new CustomError({ status: 404, message: "Category not found" });
@@ -35,7 +35,19 @@ class CategoryService {
 					as: "image",
 				},
 			},
-			{ $unwind: "$image" },
+			{
+				$project: {
+					_id: 1,
+					name: 1,
+					image: {
+						$cond: {
+							if: { $gt: [{ $size: "$image" }, 0] },
+							then: { $arrayElemAt: ["$image", 0] },
+							else: null,
+						},
+					},
+				},
+			},
 		]);
 	}
 }
