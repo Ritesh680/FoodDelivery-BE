@@ -72,10 +72,36 @@ class ProductService {
 			},
 			{
 				$lookup: {
+					from: "categories",
+					localField: "category",
+					foreignField: "_id",
+					as: "category",
+				},
+			},
+			{
+				$lookup: {
 					from: "images",
 					localField: "image",
 					foreignField: "fileId",
 					as: "image",
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					name: 1,
+					price: 1,
+					description: 1,
+					category: {
+						$cond: {
+							if: { $gt: [{ $size: "$category" }, 0] },
+							then: { $arrayElemAt: ["$category", 0] },
+							else: null,
+						},
+					},
+					quantity: 1,
+					image: 1,
+					discountedPrice: 1,
 				},
 			},
 		]);

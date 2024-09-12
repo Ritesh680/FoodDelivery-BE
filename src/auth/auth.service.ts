@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
 import { expressjwt } from "express-jwt";
-import User, { IUserDocument } from "../modules/user/user.model";
+import User from "../modules/user/user.model";
 import * as jwt from "jsonwebtoken";
 
 //@ts-expect-error the type of composable middleware is unavailable in the registry
@@ -22,12 +22,6 @@ const validateJwt = expressjwt({
 });
 
 const jwtBlackList: string[] = [];
-
-// const jwtUserInfo = expressjwt({
-// 	secret: config.secrets.session,
-// 	algorithms: ["HS256"],
-// 	credentialsRequired: false,
-// });
 
 interface IUserRequest extends Request {
 	user: any;
@@ -58,7 +52,7 @@ export default class AuthService {
 
 	googleCallbackLogin = passport.authenticate("google", {
 		failureRedirect: "/auth/login/failure",
-		successRedirect: config.clientUrl + "/?authenticated=true",
+		successRedirect: config.clientUrl,
 	});
 
 	googleLoginFailure = (req: Request, res: Response) => {
@@ -96,40 +90,10 @@ export default class AuthService {
 		});
 	};
 
-	localLogin = (req: Request, res: Response, next: NextFunction) => {
-		return passport.authenticate(
-			"local",
-			{
-				session: true,
-				failureRedirect: "/auth/login/failure",
-				userProperty: "auth",
-				assignProperty: "user",
-
-				keepSessionInfo: true,
-				passReqToCallback: true,
-				successRedirect: "/",
-			},
-			(err: any, user: IUserDocument, info: { message: string }) => {
-				const error = err || info;
-				if (error) {
-					return res.status(401).json(error);
-				}
-				if (!user) {
-					return res.status(404).json({
-						message: "Something went wrong, please try again.",
-					});
-				}
-				User.findById(user._id)
-					.exec()
-					.then((usr) => {
-						(req as any).token = AuthService.signToken(usr);
-						(req as any).tokenExpireDate = "24 Hr";
-						(req as any).USER = usr;
-						return next();
-					});
-			}
-		)(req, res, next);
-	};
+	localLogin = passport.authenticate("local", {
+		failureRedirect: "/auth/login/failure",
+		successReturnToOrRedirect: "/auth/login/success",
+	});
 
 	static signToken(user: any) {
 		return jwt.sign(
@@ -180,7 +144,6 @@ export default class AuthService {
 					req.params &&
 					Object.prototype.hasOwnProperty.call(req.params, "token")
 				) {
-					// console.log('Req PARAMS IN');
 					req.headers.authorization = `Bearer ${req.params.token}`;
 				}
 
@@ -213,17 +176,9 @@ export default class AuthService {
 							});
 						}
 						req.incUsersId = req.user.incUsersId;
-						// req.userTag = user.userTag;
-						// console.log('user.incUsersId = req.user.incUsersId', user.incUsersId, req.user.incUsersId);
 						req.user = user;
 
 						return next();
-
-						// console.log('POWER', _.merge(user, { incUsersId: req.user.incUsersId }));
-						// console.log('REQ USER', req.user);
-						// req.user = _.merge(req.user, user);
-						// console.log('IS AUTHENTICATED', user);
-						// return injectFilter(req, res, next);
 					})
 					.catch((err2) => next(err2));
 			});

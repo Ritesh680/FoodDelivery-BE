@@ -17,6 +17,14 @@ class CategoryService {
 					as: "image",
 				},
 			},
+			{
+				$lookup: {
+					from: "products",
+					localField: "_id",
+					foreignField: "category",
+					as: "products",
+				},
+			},
 			// { $unwind: "$image" },
 		]);
 		if (!category) {

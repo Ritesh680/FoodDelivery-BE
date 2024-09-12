@@ -16,16 +16,14 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: [
-		"https://food-delivery-fe-git-main-ritesh-paudels-projects.vercel.app",
-		"http://localhost:5173",
-		"http://192.168.123.5:5173",
-	],
+	origin: [config.clientUrl ?? ""],
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
+	preflightContinue: false,
 };
-app.use(express.json());
 app.use(cors(corsOptions));
+
+app.use(express.json());
 
 app.use(
 	session({
@@ -49,18 +47,17 @@ db.once("open", async () => {
 	console.info(" ");
 	console.info("------> +++++ COnnected MongoDB server +++++ <------");
 	console.info(" ");
+});
 
-	app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
-		if (err instanceof CustomError) {
-			res.status(err.status).json({ message: err.message.toString() });
-		} else {
-			res.status(500).json({ message: "An unexpected error occurred" });
-		}
-	});
+app.use("/", router);
 
-	app.use("/", router);
-
-	app.listen(port, () => {
-		console.info(`[server]: Server is running at http://localhost:${port}`);
-	});
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+	if (err instanceof CustomError) {
+		res.status(err.status).json({ message: err.message.toString() });
+	} else {
+		res.status(500).json({ message: "An unexpected error occurred" });
+	}
+});
+app.listen(port, () => {
+	console.info(`[server]: Server is running at http://localhost:${port}`);
 });
