@@ -26,4 +26,4 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "cd /home/ritesh/FOOD_DELIVERY/FoodDelivery-BE && git pull && npm ci && npm run build && pm2 restart all"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "cd /home/ritesh/FOOD_DELIVERY/FoodDelivery-BE && git pull && pnpm ci && pnpm run build && pm2 restart all"
