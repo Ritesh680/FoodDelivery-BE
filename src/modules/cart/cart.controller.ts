@@ -42,20 +42,27 @@ class CartController {
 				} else {
 					cart.products.push({ product: productId, quantity });
 				}
-				await cart.save();
+				const saved = await cart.save();
+				const response = await cartService.getSingleCartUpdatedResponse(
+					saved._id as string,
+					productId
+				);
+
 				return res.status(200).json({
 					success: true,
-					data: cart.products.find(
-						(product) => String(product.product) == String(productId)
-					),
+					data: response,
 				});
 			} else {
 				const newCart = new this.cart({
 					user: userId,
 					products: [{ product: productId, quantity }],
 				});
-				await newCart.save();
-				return res.status(200).json({ success: true, data: newCart });
+				const saved = await newCart.save();
+				const response = await cartService.getSingleCartUpdatedResponse(
+					saved._id as string,
+					productId
+				);
+				return res.status(200).json({ success: true, data: response });
 			}
 		} catch (error) {
 			return res.status(500).json({ success: false, errMessage: error });
