@@ -83,6 +83,17 @@ class CartService {
 			},
 		]);
 	}
+
+	async deleteFromCart(userId: string, productId: string) {
+		return this.cart.updateOne(
+			{ user: new mongoose.Types.ObjectId(userId) },
+			{
+				$pull: {
+					products: { product: new mongoose.Types.ObjectId(productId) },
+				},
+			}
+		);
+	}
 }
 const cartService = new CartService();
 export default cartService;

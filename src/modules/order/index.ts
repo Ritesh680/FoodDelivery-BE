@@ -20,5 +20,21 @@ orderRouter.get(
 	authService.isAutheticated(),
 	orderController.getAllOrders
 );
+orderRouter.get(
+	"/my",
+	authService.isAutheticated(),
+	orderController.getMyOrders
+);
+
+orderRouter.put(
+	"/update/:id/payment",
+	authService.isAutheticated(),
+	orderController.updateOrderPaymentStatus
+);
+orderRouter.put(
+	"/update/:id/status",
+	authService.isAutheticated(),
+	orderController.updateOrderStatus
+);
 
 export default orderRouter;
