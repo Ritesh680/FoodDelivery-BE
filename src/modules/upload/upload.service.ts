@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import CustomError from "../../@types/CustomError";
 import cloudinary from "../../config/cloudinary.config";
+import config from "../../config/config";
 class UploadService {
 	async uploadFile(path: string) {
 		// file upload logic
@@ -14,23 +15,42 @@ class UploadService {
 	}
 
 	async getFileById(id: string) {
-		// file get logic
-		return cloudinary.api.resource(id, (err, result) => {
-			if (err) {
-				throw new CustomError({ status: 500, message: err?.message });
+		try {
+			if (config().isDev) {
+				// file get logic
+				return cloudinary.api.resource(id, (err, result) => {
+					if (err) {
+						throw new CustomError({ status: 500, message: err?.message });
+					}
+					if (!result) {
+						throw new CustomError({ status: 404, message: "File not found" });
+					}
+					return result;
+				});
+			} else {
+				// file get logic
+				const filePath = path.join(process.cwd(), "uploads", id);
+				return filePath;
 			}
-			return result;
-		});
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: any) {
+			throw new CustomError({ status: 500, message: error.message });
+		}
 	}
 
 	async deleteFileById(id: string) {
 		// file delete logic
-		return cloudinary.uploader.destroy(id, (err, result) => {
-			if (err) {
-				throw new CustomError({ status: 500, message: err?.message });
-			}
-			return result;
-		});
+
+		if (config().isDev) {
+			return cloudinary.uploader.destroy(id, (err, result) => {
+				if (err) {
+					throw new CustomError({ status: 500, message: err?.message });
+				}
+				return result;
+			});
+		} else {
+			return await this.deleteFile(id);
+		}
 	}
 
 	async deleteFile(filename: string) {
@@ -40,6 +60,7 @@ class UploadService {
 			if (err) {
 				throw new CustomError({ status: 500, message: err?.message });
 			}
+			return { success: true, message: "File deleted" };
 		});
 	}
 }

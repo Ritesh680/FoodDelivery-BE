@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import imageService from "../images/image.service";
 import fileService from "./upload.service";
+import config from "../../config/config";
 
 class UploadController {
 	async uploadFile(req: Request, res: Response) {
@@ -14,7 +15,9 @@ class UploadController {
 		imageService
 			.addFile(file)
 			.then((result) => {
-				fileService.deleteFile(file.filename);
+				if (config().isDev) {
+					fileService.deleteFile(file.filename);
+				}
 				res
 					.status(200)
 					.json({ success: true, message: "File Uploaded", data: result });
@@ -27,7 +30,11 @@ class UploadController {
 		await imageService
 			.getFileById(filename)
 			.then((result) => {
-				res.sendFile(result);
+				if (result) {
+					res.sendFile(result);
+				} else {
+					res.status(404).json({ message: "File not found" });
+				}
 			})
 			.catch((err) => {
 				res.status(500).json({ message: err.message });
