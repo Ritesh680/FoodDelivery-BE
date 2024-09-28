@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import Config from "./config/config";
+import Config from "./config";
 
 const config = Config();
 

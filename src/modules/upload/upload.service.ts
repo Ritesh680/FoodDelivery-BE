@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import CustomError from "../../@types/CustomError";
-import cloudinary from "../../cloudinary.config";
+import cloudinary from "../../config/cloudinary.config";
 class UploadService {
 	async uploadFile(path: string) {
 		// file upload logic

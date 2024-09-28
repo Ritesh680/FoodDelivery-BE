@@ -10,6 +10,7 @@ export interface IUserDocument extends mongoose.Document {
 	phone: string;
 	password: string;
 	role: string;
+	isVerified: boolean;
 	provider: string;
 	picture: string;
 	salt: string;
@@ -18,11 +19,14 @@ export interface IUserDocument extends mongoose.Document {
 		callback: (arg0: string | null, arg1?: boolean) => void
 	) => boolean;
 	makeSalt: (callback: (arg0: Error | null, arg1?: string) => void) => void;
+	generateAndSetVerificationToken: () => IUserDocument;
 	encryptPassword: (
 		password: crypto.BinaryLike,
 		checkSalt: unknown,
 		callback: (arg0: Error | null, arg1?: string) => void
 	) => void;
+	verificationToken?: number;
+	verificationTokenExpires?: number;
 }
 
 const UserSchema = new mongoose.Schema<IUserDocument>({
@@ -38,6 +42,10 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 		type: String,
 		required: true,
 		unique: true,
+	},
+	isVerified: {
+		type: Boolean,
+		default: false,
 	},
 	phone: {
 		type: String,
@@ -70,6 +78,8 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 		type: String,
 	},
 	salt: String,
+	verificationToken: Number,
+	verificationTokenExpires: Number,
 });
 
 UserSchema.path("password").validate(function (password) {
@@ -130,6 +140,16 @@ const validatePresenceOf = function (value: string) {
 	return value && value.length;
 };
 
+// generate otp and set it to user database
+UserSchema.pre("save", function (next) {
+	const tthis = this || {};
+	if (tthis.isNew) {
+		tthis.verificationToken = Math.floor(1000 + Math.random() * 9000);
+		tthis.verificationTokenExpires = Date.now() + 10 * 60 * 1000;
+	}
+	next();
+});
+
 UserSchema.pre("save", function (next) {
 	// Handle new/update passwords
 	if (!this.isModified("password")) {
@@ -169,6 +189,13 @@ UserSchema.pre("save", function (next) {
 });
 
 UserSchema.methods = {
+	generateAndSetVerificationToken() {
+		const tthis = this || {};
+		tthis.verificationToken = Math.floor(1000 + Math.random() * 9000);
+		tthis.verificationTokenExpires = Date.now() + 10 * 60 * 1000;
+
+		return tthis;
+	},
 	authenticate(password: string, callback: Callback) {
 		const tthis = this || {};
 

@@ -56,9 +56,10 @@ export default class AuthService {
 	});
 
 	googleLoginFailure = (req: Request, res: Response) => {
+		const { messages } = req.session as any;
 		res.status(401).json({
 			success: false,
-			message: "user has failed to authenticate",
+			message: messages.slice(-1)[0] ?? "user has failed to authenticate",
 		});
 	};
 
@@ -93,7 +94,51 @@ export default class AuthService {
 	localLogin = passport.authenticate("local", {
 		failureRedirect: "/auth/login/failure",
 		successReturnToOrRedirect: "/auth/login/success",
+		failureMessage: true,
 	});
+
+	verifyOTP = async (req: Request, res: Response) => {
+		const { otp } = req.body;
+
+		if (!otp) {
+			res.status(400).json({
+				success: false,
+				message: "OTP is required",
+			});
+			return;
+		}
+
+		try {
+			const user = await this.userModel.findOne({
+				verificationToken: otp,
+				verificationTokenExpires: { $gt: Date.now() },
+			});
+			if (!user || user === null) {
+				res.status(401).json({
+					success: false,
+					message: "No email found or OTP expired",
+				});
+				return;
+			}
+
+			await this.userModel
+				.findByIdAndUpdate(user._id, {
+					isVerified: true,
+					verificationToken: undefined,
+					verificationTokenExpires: undefined,
+				})
+				.exec();
+
+			res.status(200).json({
+				success: true,
+				message: "OTP Verified",
+			});
+		} catch (error) {
+			res
+				.status(401)
+				.json({ success: false, message: "OTP Verification Failed", error });
+		}
+	};
 
 	static signToken(user: any) {
 		return jwt.sign(

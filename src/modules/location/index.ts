@@ -1,5 +1,5 @@
 import express from "express";
-import geocoder from "../../geocode.config";
+import geocoder from "../../config/geocode.config";
 
 const locationRoutes = express.Router();
 

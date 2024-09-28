@@ -5,6 +5,7 @@ import CustomError from "../../@types/CustomError";
 import userService from "./user.service";
 import imageService from "../images/image.service";
 import mongoose from "mongoose";
+import { sendVerificationEmail } from "../../utils/email.service";
 
 export default class UsersCtrl {
 	userModel = User;
@@ -20,13 +21,29 @@ export default class UsersCtrl {
 					.findOne({ email: req.body.email })
 					.exec();
 
-				if (user) {
+				if (!user) {
+					next();
+					return;
+				}
+
+				if (user.isVerified) {
 					return res.status(400).json({
 						success: false,
 						errMessage: `Already Registered user : ${req.body.email}`,
 					});
 				} else {
-					next();
+					const result = user.generateAndSetVerificationToken();
+
+					await this.userModel.findByIdAndUpdate({ _id: user._id }, result);
+					const verification = await sendVerificationEmail(
+						user.email,
+						user.verificationToken as number
+					);
+					return res.status(200).json({
+						success: true,
+						message: `Email already exists but not verified. Please verify your email.`,
+						data: { user, verification },
+					});
 				}
 			} catch (error) {
 				return res.status(500).json({ success: false, errMessage: error });
@@ -38,7 +55,7 @@ export default class UsersCtrl {
 		}
 	};
 
-	newUser = (req: Request, res: Response, _next: NextFunction) => {
+	newUser = async (req: Request, res: Response, _next: NextFunction) => {
 		const { name, email, phone, password } = req.body;
 
 		let _role;
@@ -48,22 +65,25 @@ export default class UsersCtrl {
 			_role = "user";
 		}
 
-		const newUser = new this.userModel({
-			name,
-			email,
-			phone,
-			password,
-			role: _role,
-		});
-
-		newUser
-			.save()
-			.then((user) => {
-				res.json(user);
-			})
-			.catch((err) => {
-				res.status(400).json(err);
+		try {
+			const newUser = new this.userModel({
+				name,
+				email,
+				phone,
+				password,
+				role: _role,
 			});
+
+			const user = await newUser.save();
+			const verification = await sendVerificationEmail(
+				email,
+				user.verificationToken as number
+			);
+
+			res.status(201).json({ success: true, data: { user, verification } });
+		} catch (error) {
+			return res.status(500).json({ success: false, errMessage: error });
+		}
 	};
 
 	updateProfileImage = async (req: Request, res: Response) => {

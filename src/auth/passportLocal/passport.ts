@@ -19,6 +19,12 @@ const setupPassport = (User: mongoose.Model<IUserDocument>) => {
 								message: "This email is not registered.",
 							});
 						}
+
+						if (user.isVerified === false) {
+							return cb(null, false, {
+								message: "This email is not verified.",
+							});
+						}
 						user.authenticate(password, (authError, authenticated) => {
 							if (authError) {
 								return cb(authError);
