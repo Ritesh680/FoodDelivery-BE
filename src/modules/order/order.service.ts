@@ -77,8 +77,6 @@ class OrderService {
 			},
 		]);
 
-		// console.log({ orders });
-
 		const cancelledProducts = orders.find(
 			(order) => order._id.status === "Cancelled"
 		)?.products;

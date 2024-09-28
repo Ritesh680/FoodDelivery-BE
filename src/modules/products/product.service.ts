@@ -106,6 +106,26 @@ class ProductService {
 			},
 		]);
 	}
+
+	async getOffers(req: Request) {
+		const allProducts = await this.getAll(req);
+		const filtered = allProducts.filter((product) => product.discountedPrice);
+		return filtered.sort((a, b) => {
+			const priceDiscountA = (a.price - a.discountedPrice) / a.price;
+			const priceDiscountB = (b.price - b.discountedPrice) / b.price;
+			return priceDiscountB - priceDiscountA;
+		});
+	}
+
+	async decreaseStock(productId: string, quantity: number) {
+		const product = await this.product.findById(productId).exec();
+		if (!product) {
+			throw new CustomError({ status: 404, message: "Product not found" });
+		}
+		product.quantity -= quantity;
+		await product.save();
+		return product;
+	}
 }
 const productService = new ProductService();
 export default productService;

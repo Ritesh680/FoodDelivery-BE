@@ -51,6 +51,17 @@ class ProductController {
 			});
 	};
 
+	getOffers = async (req: Request, res: Response) => {
+		return productService
+			.getOffers(req)
+			.then((products) => {
+				res.status(200).json({ success: true, data: products });
+			})
+			.catch((err) => {
+				res.status(500).json({ success: false, message: err });
+			});
+	};
+
 	getProductById = async (req: Request, res: Response) => {
 		const { id } = req.params;
 		if (!id) {

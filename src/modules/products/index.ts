@@ -15,6 +15,7 @@ productRouter.post(
 );
 
 productRouter.get("/", productController.getProducts);
+productRouter.get("/offers", productController.getOffers);
 
 productRouter.get("/:id", productController.getProductById);
 
