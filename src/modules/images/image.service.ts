@@ -1,20 +1,35 @@
 import CustomError from "../../@types/CustomError";
 import fileService from "../upload/upload.service";
 import Image from "./image.model";
+import Config from "../../config/config";
+
+const config = Config();
 
 class ImageService {
 	file = Image;
 	async addFile(file: Express.Multer.File) {
 		// Add file to the database
 		const { originalname, mimetype, size } = file;
-		const fileData = await fileService.uploadFile(file.path);
-		const newFile = new this.file({
-			fileId: fileData.public_id,
-			name: originalname,
-			url: fileData.secure_url,
-			size,
-			type: mimetype,
-		});
+		let newFile;
+		if (config.isDev) {
+			const fileData = await fileService.uploadFile(file.path);
+
+			newFile = new this.file({
+				fileId: fileData.public_id,
+				name: originalname,
+				url: fileData.secure_url,
+				size,
+				type: mimetype,
+			});
+		} else {
+			newFile = new this.file({
+				fileId: file.filename,
+				name: originalname,
+				url: `${config.baseUrl}/file/${file.filename}`,
+				size,
+				type: mimetype,
+			});
+		}
 
 		return newFile
 			.save()
