@@ -7,6 +7,7 @@ const UserData = [
 		phone: "1234567890",
 		password: "@secret@",
 		role: "admin",
+		isVerified: true,
 	},
 ];
 async function seedUser() {

@@ -23,6 +23,8 @@ router.get("/facebook/callback", authService.facebookCallbackLogin);
 router.get("/login/failure", authService.googleLoginFailure);
 router.post("/logout", authService.logout);
 
+router.post("/verify", authService.verifyOTP);
+
 router.get(
 	"/login/success",
 	authService.isAutheticated(),
