@@ -6,7 +6,7 @@ export async function sendVerificationEmail(email: string, token: number) {
 	const receipient = email;
 	try {
 		const res = await transport.sendMail({
-			from: "hello@riteshpaudel679.com.np",
+			from: "hello@chickendelivery.com.np",
 			to: receipient,
 			subject: "Email Verification",
 			html: VERIFICATION_EMAIL_TEMPLATE.replace(
