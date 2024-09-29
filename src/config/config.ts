@@ -1,7 +1,11 @@
 import * as dotenv from "dotenv";
+import path from "path";
 
 export default () => {
-	dotenv.config();
+	const envFile = process.env.NODE_ENV
+		? `.env.${process.env.NODE_ENV}`
+		: ".env";
+	dotenv.config({ path: path.join(__dirname, envFile) });
 
 	const envVars = {
 		database_URI: process.env.MONGO_URL,
