@@ -117,7 +117,7 @@ export default class UsersCtrl {
 				const oldPictureId = user.picture;
 				user.picture = picture;
 				try {
-					await user.save();
+					await this.userModel.findByIdAndUpdate(user._id, user);
 					await imageService.deleteFile(oldPictureId);
 					res.status(200).json({
 						success: true,

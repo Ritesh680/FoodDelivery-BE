@@ -26,6 +26,37 @@ class CategoryService {
 				},
 			},
 			{
+				$lookup: {
+					from: "subcategories",
+					localField: "_id",
+					foreignField: "category",
+					as: "subcategories",
+					pipeline: [
+						{
+							$lookup: {
+								from: "images",
+								localField: "image",
+								foreignField: "fileId",
+								as: "image",
+							},
+						},
+						{
+							$project: {
+								_id: 1,
+								name: 1,
+								image: {
+									$cond: {
+										if: { $gt: [{ $size: "$image" }, 0] },
+										then: { $arrayElemAt: ["$image", 0] },
+										else: null,
+									},
+								},
+							},
+						},
+					],
+				},
+			},
+			{
 				$project: {
 					_id: 1,
 					name: 1,
@@ -36,6 +67,7 @@ class CategoryService {
 							else: null,
 						},
 					},
+					subcategories: 1,
 					products: 1,
 				},
 			},

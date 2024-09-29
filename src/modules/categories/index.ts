@@ -14,7 +14,7 @@ categoryRouter.post(
 	"/",
 	authController.isAutheticated(),
 	bodyValidator(createCategoryDTO),
-	categoryController.createProduct
+	categoryController.createCategory
 );
 
 categoryRouter.get("/", categoryController.getCategories);

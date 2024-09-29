@@ -3,30 +3,38 @@ import Category from "./category.model";
 import fs from "fs";
 import path from "path";
 import categoryService from "./category.service";
+import db from "../../db/connection";
+import subCategoryService from "../subcategories/subcategory.service";
 
 class CategoryController {
 	categoryModal = Category;
 
-	createProduct = async (req: Request, res: Response) => {
-		const { name, image } = req.body;
+	createCategory = async (req: Request, res: Response) => {
+		const { name, image, subCategories } = req.body;
 
 		const newCategory = new this.categoryModal({
 			name,
 			image,
 		});
 
-		newCategory
-			.save()
-			.then((category) =>
-				res.status(200).json({
-					success: true,
-					message: "category created successfully",
-					data: category,
-				})
-			)
-			.catch((err) =>
-				res.status(500).json({ success: false, errMessage: err })
+		try {
+			const session = await db.startSession();
+			session.startTransaction();
+			const category = await newCategory.save();
+			await subCategoryService.createSubCategory(
+				subCategories,
+				category._id as string
 			);
+			await session.commitTransaction();
+			session.endSession();
+			res.status(200).json({
+				success: true,
+				message: "category created successfully",
+				data: category,
+			});
+		} catch (error) {
+			res.status(500).json({ success: false, errMessage: error });
+		}
 	};
 
 	getCategories = async (req: Request, res: Response) => {
