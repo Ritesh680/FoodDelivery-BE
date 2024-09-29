@@ -41,6 +41,7 @@ class ProductService {
 					price: 1,
 					description: 1,
 					category: 1,
+					subCategory: 1,
 					quantity: 1,
 					image: 1,
 					discountedPrice: 1,

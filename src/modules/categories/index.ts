@@ -20,6 +20,10 @@ categoryRouter.post(
 categoryRouter.get("/", categoryController.getCategories);
 
 categoryRouter.get("/:id", categoryController.getCategoryById);
+categoryRouter.get(
+	"/:id/subcategories",
+	categoryController.getSubCategoriesByCategoryId
+);
 
 categoryRouter.put(
 	"/:id",

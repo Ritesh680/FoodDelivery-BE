@@ -7,6 +7,7 @@ interface IProductDocument extends mongoose.Document {
 	discountedPrice: number;
 	quantity: number;
 	category: mongoose.Schema.Types.ObjectId;
+	subCategory: mongoose.Schema.Types.ObjectId;
 	image: string[];
 }
 const ObjectId = mongoose.Schema.Types.ObjectId;
@@ -35,6 +36,10 @@ const ProductSchema = new mongoose.Schema<IProductDocument>({
 		type: ObjectId,
 		ref: "Category",
 		required: true,
+	},
+	subCategory: {
+		type: ObjectId,
+		ref: "SubCategory",
 	},
 	image: {
 		type: [String],

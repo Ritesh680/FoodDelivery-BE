@@ -14,6 +14,7 @@ class ProductController {
 			quantity,
 			discountedPrice,
 			image,
+			subCategory,
 		} = req.body;
 
 		const newProduct = new this.productModal({
@@ -24,6 +25,7 @@ class ProductController {
 			quantity,
 			discountedPrice,
 			image,
+			subCategory,
 		});
 
 		newProduct

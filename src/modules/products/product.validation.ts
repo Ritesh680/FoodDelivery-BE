@@ -23,5 +23,6 @@ export const createProductDTO = z.object({
 			required_error: "Category is required",
 		})
 		.min(2),
+	subCategory: z.string().optional(),
 	images: z.array(z.string()).optional(),
 });

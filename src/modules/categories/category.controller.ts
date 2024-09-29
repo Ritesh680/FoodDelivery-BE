@@ -48,6 +48,18 @@ class CategoryController {
 			});
 	};
 
+	getSubCategoriesByCategoryId = async (req: Request, res: Response) => {
+		const { id } = req.params;
+		subCategoryService
+			.getSubCategoryByCategoryId(id)
+			.then((subCategories) => {
+				res.status(200).json({ success: true, data: subCategories });
+			})
+			.catch((err) => {
+				res.status(500).json({ success: false, message: err });
+			});
+	};
+
 	getCategoryById = async (req: Request, res: Response) => {
 		const { id } = req.params;
 		categoryService
