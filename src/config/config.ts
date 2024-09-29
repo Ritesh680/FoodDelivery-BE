@@ -1,11 +1,9 @@
 import * as dotenv from "dotenv";
-import path from "path";
 
 export default () => {
-	const envFile = process.env.NODE_ENV
-		? `.env.${process.env.NODE_ENV}`
-		: ".env";
-	dotenv.config({ path: path.join(__dirname, envFile) });
+	const envFile =
+		process.env.NODE_ENV == "production" ? `.env.production` : ".env";
+	dotenv.config({ path: process.cwd() + "/" + envFile });
 
 	const envVars = {
 		database_URI: process.env.MONGO_URL,
@@ -57,5 +55,6 @@ export default () => {
 			password: process.env.MAILTRAP_PASSWORD,
 		},
 	};
+
 	return envVars;
 };
