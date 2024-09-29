@@ -10,8 +10,13 @@ import locationRoutes from "./modules/location";
 import orderRouter from "./modules/order";
 const router = express.Router();
 
+import Config from "./config/config";
+const config = Config();
+
 router.get("/", (req, res) => {
-	res.send("Hello World! Pipeline is Ok");
+	res.send(
+		`Hello World! Pipeline is Ok. The env is loaded from ${process.env.NODE_ENV} and the client Url is ${config.clientUrl}`
+	);
 });
 
 router.use("/user", userRouter);
