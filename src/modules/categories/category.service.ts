@@ -5,7 +5,7 @@ import CustomError from "../../@types/CustomError";
 class CategoryService {
 	category = Category;
 	async getById(id: string) {
-		const category = this.category.aggregate([
+		const category = await this.category.aggregate([
 			{
 				$match: { _id: new mongoose.Types.ObjectId(id) },
 			},

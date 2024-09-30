@@ -21,7 +21,7 @@ class CategoryController {
 			const session = await db.startSession();
 			session.startTransaction();
 			const category = await newCategory.save();
-			await subCategoryService.createSubCategory(
+			const subCategory = await subCategoryService.createSubCategory(
 				subCategories,
 				category._id as string
 			);
@@ -30,7 +30,7 @@ class CategoryController {
 			res.status(200).json({
 				success: true,
 				message: "category created successfully",
-				data: category,
+				data: { category, subCategory },
 			});
 		} catch (error) {
 			res.status(500).json({ success: false, errMessage: error });
@@ -113,6 +113,9 @@ class CategoryController {
 				{ new: true }
 			)
 			.exec();
+
+		await subCategoryService.updateSubCategory(req.body.subCategories, id);
+
 		if (!updatedProduct) {
 			res.status(404).json({ success: false, message: "Category not found" });
 		}
