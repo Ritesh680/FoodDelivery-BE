@@ -67,15 +67,19 @@ class CartService {
 					],
 				},
 			},
-
 			{
 				$project: {
 					_id: 1,
 					user: 1,
-					products: {
+					product: {
 						$cond: {
 							if: { $gt: [{ $size: "$product" }, 0] },
-							then: { $arrayElemAt: ["$product", 0] },
+							then: {
+								$mergeObjects: [
+									{ $arrayElemAt: ["$product", 0] },
+									{ quantity: "$products.quantity" },
+								],
+							},
 							else: null,
 						},
 					},
