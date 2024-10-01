@@ -44,6 +44,7 @@ class ProductService {
 					subCategory: 1,
 					quantity: 1,
 					image: 1,
+					isBestSeller: 1,
 					discountedPrice: 1,
 					cart: {
 						$cond: {
@@ -93,6 +94,7 @@ class ProductService {
 					name: 1,
 					price: 1,
 					description: 1,
+					isBestSeller: 1,
 					category: {
 						$cond: {
 							if: { $gt: [{ $size: "$category" }, 0] },

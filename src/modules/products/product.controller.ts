@@ -15,6 +15,7 @@ class ProductController {
 			discountedPrice,
 			image,
 			subCategory,
+			isBestSeller,
 		} = req.body;
 
 		const newProduct = new this.productModal({
@@ -26,6 +27,7 @@ class ProductController {
 			discountedPrice,
 			image,
 			subCategory,
+			isBestSeller,
 		});
 
 		newProduct
@@ -90,6 +92,7 @@ class ProductController {
 			quantity,
 			discountedPrice,
 			image,
+			isBestSeller,
 		} = req.body;
 
 		const updatedProduct = await this.productModal
@@ -103,6 +106,7 @@ class ProductController {
 					quantity,
 					discountedPrice,
 					image,
+					isBestSeller,
 				},
 				{ new: true }
 			)

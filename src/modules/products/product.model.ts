@@ -9,6 +9,7 @@ interface IProductDocument extends mongoose.Document {
 	category: mongoose.Schema.Types.ObjectId;
 	subCategory: mongoose.Schema.Types.ObjectId;
 	image: string[];
+	isBestSeller: boolean;
 }
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -43,6 +44,10 @@ const ProductSchema = new mongoose.Schema<IProductDocument>({
 	},
 	image: {
 		type: [String],
+	},
+	isBestSeller: {
+		type: Boolean,
+		default: false,
 	},
 });
 

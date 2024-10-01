@@ -21,33 +21,44 @@ class SubCategoryService {
 		}[],
 		categoryId: string
 	) {
-		// return await this.subCategoryRepository.create(data);
-
-		return await this.subCategoryRepository.insertMany(
-			subCategories.map((subCategory) => ({
-				...subCategory,
-				category: categoryId,
-			}))
-		);
+		const allCategories = subCategories.map((subCategory) => ({
+			...subCategory,
+			category: categoryId,
+		}));
+		return await this.subCategoryRepository.insertMany(allCategories);
 	}
 
 	async updateSubCategory(
 		subCategories: {
+			_id?: string;
 			name: string;
 			image: string;
 		}[],
 		categoryId: string
 	) {
-		const subCategory = await this.subCategoryRepository.findOne({
-			category: new mongoose.Types.ObjectId(categoryId),
-		});
-		if (!subCategory) {
-			return this.createSubCategory(subCategories, categoryId);
+		try {
+			const alreadyAvailableSubcategories = subCategories.filter(
+				(categoru) => categoru._id
+			);
+			const restAvailableSubcategories = subCategories.filter(
+				(categoru) => !categoru._id
+			);
+			const response = await Promise.all(
+				alreadyAvailableSubcategories.map(async (subCategory) => {
+					await this.subCategoryRepository.findOneAndUpdate(
+						{ _id: new mongoose.Types.ObjectId(subCategory._id) },
+						{ name: subCategory.name, image: subCategory.image }
+					);
+				})
+			);
+			if (restAvailableSubcategories.length) {
+				await this.createSubCategory(restAvailableSubcategories, categoryId);
+			}
+			return response;
+		} catch (err) {
+			console.warn(err);
+			throw new Error("An error occurred:");
 		}
-		return await this.subCategoryRepository.updateOne(
-			{ category: new mongoose.Types.ObjectId(categoryId) },
-			{ $set: subCategories }
-		);
 	}
 }
 

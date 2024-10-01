@@ -24,5 +24,6 @@ export const createProductDTO = z.object({
 		})
 		.min(2),
 	subCategory: z.string().optional(),
-	images: z.array(z.string()).optional(),
+	image: z.array(z.string({ required_error: "Image is required" })).min(1),
+	isBestSeller: z.boolean().optional(),
 });

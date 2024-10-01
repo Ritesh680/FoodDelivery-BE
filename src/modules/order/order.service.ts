@@ -18,7 +18,20 @@ class OrderService {
 	}
 
 	async getAllOrders() {
-		return this.order.find().populate("user").populate("products.product");
+		const orders = await this.order
+			.find()
+			.populate("user")
+			.populate("products.product");
+		return orders
+			.map((order) => {
+				const validProducts = order.products.filter(
+					(product) => product.product
+				);
+				if (validProducts.length) {
+					return order;
+				}
+			})
+			.filter((order) => order);
 	}
 
 	async getMyOrders(userId: string) {
@@ -77,13 +90,25 @@ class OrderService {
 			},
 		]);
 
-		const cancelledProducts = orders.find(
+		const filteredOrderProducts = orders
+			.map((order) => {
+				const validProducts = order.products.filter(
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(product: any) => product.product
+				);
+				if (validProducts.length) {
+					return order;
+				}
+			})
+			.filter((order) => order);
+
+		const cancelledProducts = filteredOrderProducts.find(
 			(order) => order._id.status === "Cancelled"
 		)?.products;
-		const pendingProducts = orders.find(
+		const pendingProducts = filteredOrderProducts.find(
 			(order) => order._id.status === "pending"
 		)?.products;
-		const deliveredProducts = orders.find(
+		const deliveredProducts = filteredOrderProducts.find(
 			(order) => order._id.status === "completed"
 		)?.products;
 
