@@ -110,6 +110,18 @@ class ProductController {
 		res.status(200).json({ success: true, data: updatedProduct });
 	};
 
+	deleteProduct = async (req: Request, res: Response) => {
+		const { id } = req.params;
+		if (!id) {
+			res.status(400).json({ success: false, message: "id is required" });
+			return;
+		}
+		await this.productModal.findByIdAndDelete(id).exec();
+		res
+			.status(200)
+			.json({ success: true, message: "product deleted successfully" });
+	};
+
 	uploadImage = async (req: Request, res: Response) => {
 		const { id } = req.params;
 		if (!id) {
