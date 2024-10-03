@@ -94,8 +94,9 @@ class OrderService {
 			.map((order) => {
 				const validProducts = order.products.filter(
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					(product: any) => product.product
+					(product: any) => product._id
 				);
+
 				if (validProducts.length) {
 					return order;
 				}

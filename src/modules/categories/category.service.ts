@@ -23,6 +23,16 @@ class CategoryService {
 					localField: "_id",
 					foreignField: "category",
 					as: "products",
+					pipeline: [
+						{
+							$lookup: {
+								from: "images",
+								localField: "image",
+								foreignField: "fileId",
+								as: "image",
+							},
+						},
+					],
 				},
 			},
 			{
