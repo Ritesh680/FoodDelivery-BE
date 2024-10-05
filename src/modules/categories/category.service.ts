@@ -99,9 +99,18 @@ class CategoryService {
 				},
 			},
 			{
+				$lookup: {
+					from: "subcategories",
+					localField: "_id",
+					foreignField: "category",
+					as: "subcategories",
+				},
+			},
+			{
 				$project: {
 					_id: 1,
 					name: 1,
+					subcategories: 1,
 					image: {
 						$cond: {
 							if: { $gt: [{ $size: "$image" }, 0] },
