@@ -120,6 +120,51 @@ class ProductService {
 		});
 	}
 
+	async getBestSellers() {
+		return this.product.aggregate([
+			{
+				$match: {
+					isBestSeller: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "categories",
+					localField: "category",
+					foreignField: "_id",
+					as: "category",
+				},
+			},
+			{
+				$lookup: {
+					from: "images",
+					localField: "image",
+					foreignField: "fileId",
+					as: "image",
+				},
+			},
+			{
+				$project: {
+					_id: 1,
+					name: 1,
+					price: 1,
+					description: 1,
+					isBestSeller: 1,
+					category: {
+						$cond: {
+							if: { $gt: [{ $size: "$category" }, 0] },
+							then: { $arrayElemAt: ["$category", 0] },
+							else: null,
+						},
+					},
+					quantity: 1,
+					image: 1,
+					discountedPrice: 1,
+				},
+			},
+		]);
+	}
+
 	async decreaseStock(productId: string, quantity: number) {
 		const product = await this.product.findById(productId).exec();
 		if (!product) {

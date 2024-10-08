@@ -56,10 +56,19 @@ class CartService {
 					as: "product",
 					pipeline: [
 						{
+							$lookup: {
+								from: "images",
+								localField: "image",
+								foreignField: "fileId",
+								as: "image",
+							},
+						},
+						{
 							$project: {
 								_id: 1,
 								name: 1,
 								price: 1,
+								image: 1,
 								discountedPrice: 1,
 								quantity: "$products.quantity",
 							},
