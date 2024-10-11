@@ -24,19 +24,11 @@ router.get("/login/failure", authService.googleLoginFailure);
 router.post("/logout", authService.logout);
 
 router.post("/verify", authService.verifyOTP);
+router.post("/forgot-password", authService.forgotPassword);
+router.post("/reset-password/:token", authService.resetPassword);
 
-router.get(
-	"/login/success",
-	authService.isAutheticated(),
-	authService.manageUser,
-	authService.returnUserData
-);
+router.get("/login/success", authService.isAutheticated(), authService.manageUser, authService.returnUserData);
 
-router.post(
-	"/local/login",
-	authService.localLogin,
-	authService.manageUser,
-	authService.returnUserData
-);
+router.post("/local/login", authService.localLogin, authService.manageUser, authService.returnUserData);
 
 export default router;

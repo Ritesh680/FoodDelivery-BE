@@ -12,6 +12,7 @@ import passport from "passport";
 import * as _ from "lodash";
 import Config from "../config/config";
 import userService from "../modules/user/user.service";
+import { sendResetPasswordEmail } from "../utils/email.service";
 
 const config = Config();
 
@@ -96,6 +97,104 @@ export default class AuthService {
 		successReturnToOrRedirect: "/auth/login/success",
 		failureMessage: true,
 	});
+
+	forgotPassword = async (req: Request, res: Response) => {
+		const { email } = req.body;
+		if (!email) {
+			res.status(400).json({
+				success: false,
+				message: "Email is required",
+			});
+			return;
+		}
+		try {
+			const user = await this.userModel.findOne({ email });
+			if (!user) {
+				return res.status(404).json({
+					success: false,
+					message: "The requested email doesnot exist",
+				});
+			}
+
+			const newUser = await user.generateAndSetResetToken?.();
+
+			await this.userModel.findByIdAndUpdate(user._id, newUser);
+
+			//send reset email
+
+			await sendResetPasswordEmail(
+				email,
+				`${config.clientUrl}/reset-password/${newUser?.resetPasswordToken}`
+			);
+
+			res.status(200).json({
+				success: true,
+				message: "Reset password email sent",
+			});
+		} catch (err) {
+			return res.status(500).json({
+				success: false,
+				message: "Internal server error",
+				err,
+			});
+		}
+	};
+
+	resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { token } = req.params;
+			const { password } = req.body;
+
+			const user = await this.userModel.findOne({
+				resetPasswordToken: token,
+				resetPasswordExpires: { $gt: Date.now() },
+			});
+
+			if (!user) {
+				return res.status(401).json({
+					success: false,
+					message: "Password reset token is invalid or has expired",
+				});
+			}
+
+			user.makeSalt((saltErr, salt) => {
+				if (saltErr) {
+					return next(saltErr);
+				}
+
+				user.encryptPassword(
+					password,
+					salt,
+					async (encryptErr, hashedPassword) => {
+						if (encryptErr) {
+							return next(encryptErr);
+						}
+						const updatedUser = await this.userModel.findByIdAndUpdate(
+							user._id,
+							{
+								salt,
+								password: hashedPassword,
+								resetPasswordToken: undefined,
+								resetPasswordExpires: undefined,
+							}
+						);
+
+						res.status(200).json({
+							success: true,
+							message: "Password reset successful",
+							data: updatedUser,
+						});
+					}
+				);
+			});
+		} catch (error) {
+			res.status(500).json({
+				success: false,
+				message: "Internal server error",
+				error,
+			});
+		}
+	};
 
 	verifyOTP = async (req: Request, res: Response) => {
 		const { otp } = req.body;

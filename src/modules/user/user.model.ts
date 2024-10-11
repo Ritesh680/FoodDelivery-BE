@@ -27,6 +27,9 @@ export interface IUserDocument extends mongoose.Document {
 	) => void;
 	verificationToken?: number;
 	verificationTokenExpires?: number;
+	resetPasswordToken?: string;
+	resetPasswordExpires?: number;
+	generateAndSetResetToken?: () => IUserDocument;
 }
 
 const UserSchema = new mongoose.Schema<IUserDocument>({
@@ -79,6 +82,8 @@ const UserSchema = new mongoose.Schema<IUserDocument>({
 	},
 	salt: String,
 	verificationToken: Number,
+	resetPasswordToken: String,
+	resetPasswordExpires: Number,
 	verificationTokenExpires: Number,
 });
 
@@ -196,6 +201,14 @@ UserSchema.methods = {
 
 		return tthis;
 	},
+	generateAndSetResetToken() {
+		const tthis = this || {};
+		tthis.resetPasswordToken = crypto.randomBytes(20).toString("hex");
+		tthis.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+
+		return tthis;
+	},
+
 	authenticate(password: string, callback: Callback) {
 		const tthis = this || {};
 
