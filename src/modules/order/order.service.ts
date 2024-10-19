@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import cartService from "../cart/cart.service";
 import Order, { IOrder } from "./order.model";
+import productService from "../products/product.service";
 
 class OrderService {
 	order = Order;
@@ -8,6 +9,7 @@ class OrderService {
 		const newOrder = new this.order(order);
 		newOrder.save().then(() => {
 			order.products.forEach(async (product) => {
+				await productService.decreaseStock(product.product, product.quantity);
 				return await cartService.deleteFromCart(
 					String(order.user),
 					product.product

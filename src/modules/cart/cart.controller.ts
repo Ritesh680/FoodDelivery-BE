@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import Cart from "./cart.model";
 import mongoose from "mongoose";
 import cartService from "./cart.service";
@@ -6,7 +6,7 @@ import productService from "../products/product.service";
 
 class CartController {
 	cart = Cart;
-	addToCart = async (req: Request, res: Response, next: NextFunction) => {
+	addToCart = async (req: Request, res: Response) => {
 		const { quantity, productId } = req.body;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)._id;
@@ -23,10 +23,17 @@ class CartController {
 				message: "Quantity is required",
 			});
 		}
-		const product = await productService.getById(productId).catch(next);
+		const product = await productService.getById(productId);
 
 		if (!product) {
 			return;
+		}
+
+		if (product[0].quantity < quantity) {
+			return res.status(200).json({
+				success: false,
+				message: "The requested Product is out of stock",
+			});
 		}
 
 		try {
