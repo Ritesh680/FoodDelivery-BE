@@ -2,6 +2,14 @@ import { Request } from "express";
 import User from "./user.model";
 import mongoose from "mongoose";
 
+interface IGetUser {
+	_id: string;
+	name: string;
+	email: string;
+	phone?: string;
+	role: "user" | "admin";
+}
+
 class UserService {
 	user = User;
 	async getAll(req: Request) {
@@ -17,7 +25,7 @@ class UserService {
 			},
 		]);
 	}
-	async getUserById(id: string) {
+	async getUserById(id: string): Promise<IGetUser[]> {
 		return this.user.aggregate([
 			{
 				$match: {

@@ -53,6 +53,8 @@ export default () => {
 			port: process.env.MAILTRAP_PORT,
 			username: process.env.MAILTRAP_USERNAME,
 			password: process.env.MAILTRAP_PASSWORD,
+			senderEmail: process.env.MAILTRAP_SENDER_EMAIL,
+			ownerEmail: process.env.MAILTRAP_OWNER_EMAIL,
 		},
 	};
 

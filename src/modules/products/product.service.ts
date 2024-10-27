@@ -3,9 +3,26 @@ import Product from "./product.model";
 import CustomError from "../../@types/CustomError";
 import { Request } from "express";
 
+interface IProduct {
+	_id: string;
+	name: string;
+	price: number;
+	description: string;
+	category: string;
+	subCategory: string;
+	quantity: number;
+	image: string;
+	isBestSeller: boolean;
+	discountedPrice: number;
+	cart: {
+		_id: string;
+		quantity: number;
+	};
+}
+
 class ProductService {
 	product = Product;
-	async getById(productId: string, userId?: string) {
+	async getById(productId: string, userId?: string): Promise<IProduct[]> {
 		const product = this.product.aggregate([
 			{ $match: { _id: new mongoose.Types.ObjectId(productId) } },
 			{

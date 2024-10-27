@@ -7,7 +7,7 @@ class OrderService {
 	order = Order;
 	async createOrder(order: IOrder) {
 		const newOrder = new this.order(order);
-		newOrder.save().then(() => {
+		newOrder.save().then(async () => {
 			order.products.forEach(async (product) => {
 				await productService.decreaseStock(product.product, product.quantity);
 				return await cartService.deleteFromCart(
