@@ -12,6 +12,7 @@ const router = express.Router();
 
 import Config from "./config/config";
 import landingPage from "./modules/landingPage";
+import addressRouter from "./modules/address";
 const config = Config();
 
 router.get("/", (req, res) => {
@@ -29,5 +30,6 @@ router.use("/cart", cartRouter);
 router.use("/location", locationRoutes);
 router.use("/order", orderRouter);
 router.use("/landingPage", landingPage);
+router.use("/address", addressRouter);
 
 export default router;
