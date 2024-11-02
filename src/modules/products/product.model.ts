@@ -21,7 +21,6 @@ const ProductSchema = new mongoose.Schema<IProductDocument>({
 	},
 	shortDescription: {
 		type: String,
-		required: true,
 	},
 	description: {
 		type: String,
