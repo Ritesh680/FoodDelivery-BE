@@ -4,6 +4,9 @@ export const createProductDTO = z.object({
 	name: z.string({
 		required_error: "Product name is required",
 	}),
+	shortDescription: z.string({
+		required_error: "Short description is required",
+	}),
 	description: z
 		.string({
 			required_error: "Description is required",

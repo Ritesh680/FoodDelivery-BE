@@ -57,6 +57,7 @@ class ProductService {
 					name: 1,
 					price: 1,
 					description: 1,
+					shortDescription: 1,
 					category: 1,
 					subCategory: 1,
 					quantity: 1,
@@ -110,6 +111,7 @@ class ProductService {
 					_id: 1,
 					name: 1,
 					price: 1,
+					shortDescription: 1,
 					description: 1,
 					isBestSeller: 1,
 					category: {
@@ -166,6 +168,7 @@ class ProductService {
 					name: 1,
 					price: 1,
 					description: 1,
+					shortDescription: 1,
 					isBestSeller: 1,
 					category: {
 						$cond: {

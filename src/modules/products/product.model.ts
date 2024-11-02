@@ -5,6 +5,7 @@ interface IProductDocument extends mongoose.Document {
 	description: string;
 	price: number;
 	discountedPrice: number;
+	shortDescription: string;
 	quantity: number;
 	category: mongoose.Schema.Types.ObjectId;
 	subCategory: mongoose.Schema.Types.ObjectId;
@@ -15,6 +16,10 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const ProductSchema = new mongoose.Schema<IProductDocument>({
 	name: {
+		type: String,
+		required: true,
+	},
+	shortDescription: {
 		type: String,
 		required: true,
 	},
