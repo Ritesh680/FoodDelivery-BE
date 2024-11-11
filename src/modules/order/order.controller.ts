@@ -52,7 +52,7 @@ class OrderController {
 						.reduce((acc, curr) => acc + curr.quantity, 0)
 						.toString(),
 				},
-				"Kathmandu, Nepal"
+				`${city}, ${street}`
 			);
 			res.status(201).json({ success: true, data: newOrder });
 		} catch (error) {
