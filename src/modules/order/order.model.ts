@@ -10,6 +10,7 @@ export interface IOrder {
 	status?: string;
 	paymentMethod: string;
 	paymentStatus?: string;
+	address: string;
 	contact: string;
 	createdAt?: Date;
 }
@@ -49,6 +50,7 @@ const OrderSchema = new Schema<OrderDocument>({
 		enum: ["pending", "completed"],
 		default: "pending",
 	},
+	address: { type: String },
 	contact: {
 		type: String,
 		required: true,

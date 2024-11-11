@@ -8,10 +8,12 @@ interface IRequestBody {
 	phone: string;
 	products: { product: string; quantity: number }[];
 	paymentMethod: string;
+	city: string;
+	street: string;
 }
 class OrderController {
 	async createOrder(req: Request<object, object, IRequestBody>, res: Response) {
-		const { phone, products, paymentMethod } = req.body;
+		const { phone, products, paymentMethod, city, street } = req.body;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)._id;
 		try {
@@ -20,6 +22,7 @@ class OrderController {
 				user: userId,
 				paymentMethod,
 				products,
+				address: `${city}, ${street}`,
 			});
 
 			const userInfo = await userService.getUserById(userId);
