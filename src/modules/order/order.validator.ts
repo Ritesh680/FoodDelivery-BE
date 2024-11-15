@@ -26,4 +26,7 @@ export const createOrderDTO = z.object({
 			}),
 		})
 	),
+	total: z.number({
+		required_error: "Total is required",
+	}),
 });

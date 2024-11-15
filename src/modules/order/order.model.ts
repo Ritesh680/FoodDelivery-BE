@@ -13,6 +13,7 @@ export interface IOrder {
 	address: string;
 	contact: string;
 	createdAt?: Date;
+	totalPrice?: number;
 }
 type OrderDocument = IOrder & Document;
 
@@ -58,6 +59,10 @@ const OrderSchema = new Schema<OrderDocument>({
 	createdAt: {
 		type: Date,
 		default: Date.now,
+	},
+	totalPrice: {
+		type: Number,
+		required: true,
 	},
 });
 

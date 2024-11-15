@@ -10,10 +10,11 @@ interface IRequestBody {
 	paymentMethod: string;
 	city: string;
 	street: string;
+	total: number;
 }
 class OrderController {
 	async createOrder(req: Request<object, object, IRequestBody>, res: Response) {
-		const { phone, products, paymentMethod, city, street } = req.body;
+		const { phone, products, paymentMethod, city, street, total } = req.body;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const userId = (req.user as any)._id;
 		try {
@@ -23,6 +24,7 @@ class OrderController {
 				paymentMethod,
 				products,
 				address: `${city}, ${street}`,
+				totalPrice: total,
 			});
 
 			const userInfo = await userService.getUserById(userId);
@@ -46,7 +48,15 @@ class OrderController {
 						.map((product) => product.product.name)
 						.join(","),
 					amount: allProduct
-						.reduce((acc, curr) => acc + curr.product.price * curr.quantity, 0)
+						.reduce(
+							(acc, curr) =>
+								acc +
+								(curr.product.discountedPrice
+									? curr.product.discountedPrice
+									: curr.product.price) *
+									curr.quantity,
+							0
+						)
 						.toString(),
 					quantity: allProduct
 						.reduce((acc, curr) => acc + curr.quantity, 0)
