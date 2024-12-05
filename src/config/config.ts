@@ -37,6 +37,7 @@ export default () => {
 		facebookCallbackURL: process.env.FACEBOOK_CALLBACK_URL ?? "",
 
 		clientUrl: process.env.CLIENT_URL,
+		clientUrl2: process.env.CLIENT_URL2,
 		tokenLife: 60 * 60 * 24,
 		refreshTokenLife: 60 * 60 * 24 * 7,
 

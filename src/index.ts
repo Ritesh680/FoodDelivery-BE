@@ -16,7 +16,7 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: [config.clientUrl ?? ""],
+	origin: [config.clientUrl ?? "", config.clientUrl2 ?? ""],
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
 	preflightContinue: false,
