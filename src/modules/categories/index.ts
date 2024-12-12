@@ -39,4 +39,6 @@ categoryRouter.delete(
 	uploadController.deleteFile
 );
 
+categoryRouter.delete("/subcategory/:id", categoryController.deleteSubcategory);
+
 export default categoryRouter;

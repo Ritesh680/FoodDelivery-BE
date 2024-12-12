@@ -60,6 +60,12 @@ class SubCategoryService {
 			throw new Error("An error occurred:");
 		}
 	}
+
+	async deleteSubCategory(subCategoryId: string) {
+		return await this.subCategoryRepository.deleteOne({
+			_id: new mongoose.Types.ObjectId(subCategoryId),
+		});
+	}
 }
 
 const subCategoryService = new SubCategoryService();

@@ -72,6 +72,23 @@ class CategoryController {
 			});
 	};
 
+	deleteSubcategory = async (req: Request, res: Response) => {
+		const { id } = req.params;
+		if (!id) {
+			res.status(400).json({ success: false, message: "id is required" });
+			return;
+		}
+		const subCategory = await subCategoryService.deleteSubCategory(id);
+		if (!subCategory) {
+			res
+				.status(404)
+				.json({ success: false, message: "SubCategory not found" });
+		}
+		res
+			.status(200)
+			.json({ success: true, message: "SubCategory deleted successfully" });
+	};
+
 	deleteCategory = async (req: Request, res: Response) => {
 		const { id } = req.params;
 		if (!id) {
