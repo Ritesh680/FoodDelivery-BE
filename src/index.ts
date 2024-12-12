@@ -16,7 +16,10 @@ const app: Express = express();
 const port = config.port || 3000;
 
 const corsOptions: CorsOptions = {
-	origin: [config.clientUrl ?? "", config.clientUrl2 ?? ""],
+	origin: [
+		config.clientUrl ?? "https://chickendeliverynepal.com",
+		config.clientUrl2 ?? "https://www.chickendeliverynepal.com",
+	],
 	methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
 	credentials: true,
 	preflightContinue: false,
