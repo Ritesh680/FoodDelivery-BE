@@ -80,9 +80,9 @@ class ProductService {
 		return product;
 	}
 
-	getAll(req: Request) {
-		const { search } = req.query;
-		return this.product.aggregate([
+	async getAll(req: Request) {
+		const { search, pageSize = 10, page = 1 } = req.query;
+		const products = await this.product.aggregate([
 			{
 				$match: {
 					name: {
@@ -90,6 +90,8 @@ class ProductService {
 					},
 				},
 			},
+			{ $skip: parseInt(pageSize as string) * (parseInt(page as string) - 1) },
+			{ $limit: parseInt(pageSize as string) * parseInt(page as string) },
 			{
 				$lookup: {
 					from: "categories",
@@ -127,11 +129,15 @@ class ProductService {
 				},
 			},
 		]);
+		const total = await this.product.countDocuments();
+		return { products, total };
 	}
 
 	async getOffers(req: Request) {
 		const allProducts = await this.getAll(req);
-		const filtered = allProducts.filter((product) => product.discountedPrice);
+		const filtered = allProducts.products.filter(
+			(product) => product.discountedPrice
+		);
 		return filtered.sort((a, b) => {
 			const priceDiscountA = (a.price - a.discountedPrice) / a.price;
 			const priceDiscountB = (b.price - b.discountedPrice) / b.price;
@@ -139,13 +145,15 @@ class ProductService {
 		});
 	}
 
-	async getBestSellers() {
-		return this.product.aggregate([
+	async getBestSellers(page: number, pageSize: number) {
+		const products = await this.product.aggregate([
 			{
 				$match: {
 					isBestSeller: true,
 				},
 			},
+			{ $skip: pageSize * (page - 1) },
+			{ $limit: pageSize * page },
 			{
 				$lookup: {
 					from: "categories",
@@ -183,6 +191,9 @@ class ProductService {
 				},
 			},
 		]);
+		const count = await this.product.countDocuments({ isBestSeller: true });
+
+		return { products, count };
 	}
 
 	async decreaseStock(productId: string, quantity: number) {

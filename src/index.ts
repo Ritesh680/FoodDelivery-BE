@@ -25,7 +25,12 @@ const corsOptions: CorsOptions = {
 	preflightContinue: false,
 };
 app.use(cors(corsOptions));
-
+app.use(
+	express.static("public", {
+		maxAge: 31557600000,
+		immutable: true,
+	})
+);
 app.use(express.json());
 
 app.use(

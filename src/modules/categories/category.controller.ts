@@ -62,10 +62,25 @@ class CategoryController {
 
 	getCategoryById = async (req: Request, res: Response) => {
 		const { id } = req.params;
+		const { productSize, productPage, sub } = req.query;
 		categoryService
-			.getById(id)
+			.getById(
+				id,
+				sub as string,
+				parseInt(productPage as string),
+				parseInt(productSize as string)
+			)
 			.then((category) => {
-				res.status(200).json({ success: true, data: category[0] });
+				res.status(200).json({
+					success: true,
+					data: category.category[0],
+					metaData: {
+						total: category.totalProducts,
+						totalPages: Math.ceil(
+							category.totalProducts / parseInt(productSize as string)
+						),
+					},
+				});
 			})
 			.catch((err) => {
 				res.status(500).json({ success: false, message: err });

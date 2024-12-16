@@ -51,7 +51,11 @@ class ProductController {
 		return productService
 			.getAll(req)
 			.then((products) => {
-				res.status(200).json({ success: true, data: products });
+				res.status(200).json({
+					success: true,
+					data: products.products,
+					metaData: { total: products.total },
+				});
 			})
 			.catch((err) => {
 				res.status(500).json({ success: false, message: err });
@@ -70,10 +74,15 @@ class ProductController {
 	};
 
 	getBestSeller = async (req: Request, res: Response) => {
+		const { pageSize = 10, page = 1 } = req.query;
 		return productService
-			.getBestSellers()
+			.getBestSellers(parseInt(page as string), parseInt(pageSize as string))
 			.then((products) => {
-				res.status(200).json({ success: true, data: products });
+				res.status(200).json({
+					success: true,
+					data: products.products,
+					metaData: { total: products.count },
+				});
 			})
 			.catch((err) => {
 				res.status(500).json({ success: false, message: err });
