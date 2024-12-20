@@ -81,7 +81,10 @@ class ProductService {
 	}
 
 	async getAll(req: Request) {
-		const { search, pageSize = 10, page = 1 } = req.query;
+		const { search } = req.query;
+		const page = parseInt(req.query.page as string) || 1;
+		const pageSize = parseInt(req.query.pageSize as string) || 10;
+
 		const products = await this.product.aggregate([
 			{
 				$match: {
@@ -90,8 +93,8 @@ class ProductService {
 					},
 				},
 			},
-			{ $skip: parseInt(pageSize as string) * (parseInt(page as string) - 1) },
-			{ $limit: parseInt(pageSize as string) * parseInt(page as string) },
+			{ $skip: (page - 1) * pageSize },
+			{ $limit: pageSize },
 			{
 				$lookup: {
 					from: "categories",
